@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community · Trainers & People | De Club Tel Aviv</title>
+    <meta name="description" content="Meet the fighters, movers, and thinkers behind De Club. Our community of world-class trainers and dedicated members.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68dcb8f8b879f248a9f4ce19_favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68dcb9067610447c199b77ee_webclip.png">
+    <link rel="stylesheet" href="pages.css">
+    <style>
+        /* ===== Original De Club CSS Variables ===== */
+        :root {
+            --black: black;
+            --white: white;
+            --green: #d1dcbd;
+            --brown: #8f8b7e;
+            --outline: #fff6;
+        }
+
+        /* ===== Community Hero — from original ===== */
+        .community-hero-wrap {
+            padding: 0 20px;
+        }
+        .community-hero {
+            text-align: center;
+            background-image: url('https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/6926cbcfe328fa672a673739_cc00e5a56e82121084528ccd0bc4c0c5_community-hero.webp');
+            background-position: 50%;
+            background-size: cover;
+            border-radius: 60px;
+            flex-flow: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 80vh;
+            min-height: 450px;
+            display: flex;
+        }
+        .community-hero h1 {
+            font-family: Figtree, sans-serif;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            font-weight: 400;
+            color: var(--white);
+            text-transform: uppercase;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+        }
+
+        /* ===== Section Header ===== */
+        .section-header {
+            text-align: center;
+            padding: clamp(50px, 7vw, 100px) 20px clamp(30px, 4vw, 50px);
+        }
+        .section-header h2 {
+            font-family: Figtree, sans-serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+            font-weight: 400;
+            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        /* ===== Trainers Grid — exact from original ===== */
+        .trainers-grid {
+            grid-column-gap: 24px;
+            grid-row-gap: 24px;
+            grid-template-rows: auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-auto-columns: 1fr;
+            display: grid;
+            padding: 0 20px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* ===== Trainer Card — exact from original ===== */
+        .trainer-card {
+            aspect-ratio: 2 / 3;
+            border-radius: 20px;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .trainer-image {
+            background-position: 50%;
+            background-size: cover;
+            border-radius: 20px;
+            position: absolute;
+            inset: 0%;
+            overflow: clip;
+            transition: transform 0.5s ease;
+        }
+
+        .trainer-card:hover .trainer-image {
+            transform: scale(1.03);
+        }
+
+        .trainer-overlay {
+            background-image: linear-gradient(#fff0, #0009);
+            position: absolute;
+            inset: 0%;
+            border-radius: 20px;
+            z-index: 1;
+            transition: background-image 0.4s ease;
+        }
+
+        .trainer-card:hover .trainer-overlay {
+            background-image: linear-gradient(#000a, #000c);
+        }
+
+        .trainer-content {
+            grid-column-gap: 10px;
+            grid-row-gap: 10px;
+            flex-flow: column;
+            justify-content: space-between;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            position: relative;
+            z-index: 2;
+        }
+
+        .trainer-about {
+            color: var(--white);
+            width: 100%;
+            font-family: 'IBM Plex Mono', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 400;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.4s ease, max-height 0.4s ease;
+        }
+
+        .trainer-card:hover .trainer-about {
+            opacity: 1;
+            max-height: 400px;
+        }
+
+        .trainer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .trainer-name {
+            color: var(--white);
+            text-transform: uppercase;
+            margin-bottom: 0;
+            font-family: Figtree, sans-serif;
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .trainer-icon {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* Plus icon using CSS (matching original SVG icon) */
+        .trainer-icon::before,
+        .trainer-icon::after {
+            content: '';
+            position: absolute;
+            background: var(--white);
+            border-radius: 2px;
+            transition: transform 0.3s ease;
+        }
+        .trainer-icon::before {
+            width: 18px;
+            height: 1.5px;
+        }
+        .trainer-icon::after {
+            width: 1.5px;
+            height: 18px;
+        }
+        .trainer-card:hover .trainer-icon::after {
+            transform: rotate(90deg);
+        }
+        .trainer-card:hover .trainer-icon::before {
+            transform: rotate(90deg);
+        }
+
+        /* ===== CTA Banner ===== */
+        .cta-banner {
+            margin: clamp(50px, 7vw, 100px) 20px 0;
+            border-radius: 60px;
+            overflow: hidden;
+            height: 50vh;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 28px;
+            position: relative;
+        }
+        .cta-banner-bg {
+            position: absolute;
+            inset: 0;
+            background: url('https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c0be47885e58a16ce8324_1fabf59f5d5c308952a3c1c4accc29fc_menu-img.webp') center/cover no-repeat;
+        }
+        .cta-banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+        }
+        .cta-banner h2 {
+            position: relative;
+            z-index: 2;
+            font-family: Figtree, sans-serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 400;
+            color: var(--white);
+            text-align: center;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+        .cta-banner .btn {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== Footer Tagline ===== */
+        .footer-tagline {
+            text-align: center;
+            padding: clamp(50px, 7vw, 90px) 20px clamp(20px, 3vw, 40px);
+        }
+        .footer-tagline p {
+            font-family: Figtree, sans-serif;
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            font-weight: 500;
+            color: var(--white);
+            text-transform: uppercase;
+        }
+
+        /* ===== Social Icons ===== */
+        .social-icons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            padding-bottom: clamp(40px, 5vw, 70px);
+        }
+        .social-icons a {
+            color: var(--white);
+            transition: color 0.3s ease;
+        }
+        .social-icons a:hover {
+            color: var(--green);
+        }
+        .social-icons svg {
+            width: 30px;
+            height: 30px;
+            fill: currentColor;
+        }
+
+        /* ===== Responsive — from original ===== */
+        @media screen and (max-width: 991px) {
+            .trainers-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-column-gap: 16px;
+                grid-row-gap: 16px;
+            }
+            .community-hero {
+                border-radius: 30px;
+                height: 60vh;
+            }
+            .cta-banner {
+                border-radius: 30px;
+            }
+            .trainer-name {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (max-width: 479px) {
+            .trainers-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-column-gap: 10px;
+                grid-row-gap: 10px;
+                padding: 0 10px;
+            }
+            .community-hero-wrap {
+                padding: 0 10px;
+            }
+            .community-hero {
+                border-radius: 20px;
+                height: 50vh;
+                min-height: 320px;
+            }
+            .trainer-card {
+                padding: 14px;
+                border-radius: 14px;
+            }
+            .trainer-image {
+                border-radius: 14px;
+            }
+            .trainer-overlay {
+                border-radius: 14px;
+            }
+            .trainer-name {
+                font-size: 14px;
+            }
+            .trainer-about {
+                font-size: 11px;
+                line-height: 1.5;
+            }
+            .trainer-icon {
+                width: 22px;
+                height: 22px;
+            }
+            .trainer-icon::before { width: 14px; }
+            .trainer-icon::after { height: 14px; }
+            .cta-banner {
+                border-radius: 20px;
+                margin-left: 10px;
+                margin-right: 10px;
+                height: 40vh;
+                min-height: 260px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <a href="index.html" class="nav-logo"><img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68cff1151ce82cd6aef9bf30_logo-declub.svg" alt="De Club" class="nav-logo-img"></a>
+        <div class="nav-links">
+            <a href="index.html#about" class="nav-link">Who We Are</a>
+            <a href="index.html#floors" class="nav-link">The Floors</a>
+            <a href="community.html" class="nav-link">Community</a>
+            <a href="join.html" class="nav-link nav-link--cta">Become a Member</a>
+        </div>
+        <button class="nav-menu-btn" id="menuBtn" aria-label="Open menu"><span class="menu-line"></span><span class="menu-line"></span></button>
+    </nav>
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-overlay-content">
+            <a href="index.html" class="menu-link" data-index="01">Home</a>
+            <a href="index.html#floors" class="menu-link" data-index="02">The Floors</a>
+            <div class="menu-sub-links">
+                <a href="vuca.html" class="menu-sub-link">VUCA · Boxing</a>
+                <a href="art.html" class="menu-sub-link">ART · Movement</a>
+                <a href="livo.html" class="menu-sub-link">LIVO · Recovery</a>
+                <a href="echo.html" class="menu-sub-link">ECHO · Lounge</a>
+            </div>
+            <a href="community.html" class="menu-link" data-index="03">Community</a>
+            <a href="join.html" class="menu-link" data-index="04">Become a Member</a>
+        </div>
+        <div class="menu-overlay-footer">
+            <div class="menu-socials"><a href="https://instagram.com/declub_tlv" target="_blank">Instagram</a><a href="https://wa.me/15512399833?text=%D7%94%D7%99%D7%99%20%D7%93%D7%94%20%D7%A7%D7%9C%D7%90%D7%91%20%3A%29" target="_blank">WhatsApp</a></div>
+            <p class="menu-address">2 Bar-Giyora St., Tel Aviv</p>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="community-hero-wrap">
+        <section class="community-hero">
+            <h1>The Fighters,<br>The Movers,<br>The Thinkers.</h1>
+        </section>
+    </div>
+
+    <!-- Section Header -->
+    <div class="section-header">
+        <h2>Our Trainers</h2>
+    </div>
+
+    <!-- Trainers Grid -->
+    <div class="trainers-grid">
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/698b1528df8b0dd9a3baced9_adi.webp')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a combat sports coach and former K1 Kickboxing World Champion (2009–2011) and Professional Muay Thai World Champion (2012–2013). Certified by the Ministry of Sports, her training blends bag work, partner drills, and varied techniques to build strength, endurance, and conditioning in a precise, challenging, and safe format for all levels.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Adi Rotem</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697b5b501ff5a67a95f14112_Noa%20Brofman.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a dancer and creator, teaching modern dance, movement, soft acrobatics, and handstands. Her work balances technique with freedom of movement, creating a supportive space for developing a strong, intelligent body. Her classes invite exploration, musicality, and shared practice through attentive and precise movement.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Noa Brofman</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697b5b3a8a728de9f6f26376_Ranyana%20Balance.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">specializes in handstands, skills, movement, flexibility, and contortion. Her practice focuses on the connection between body, brain, and the nervous system, using precise and progressive methods to build strength, control, and awareness.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Ranyana</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697b5affb1800f3387206d28_Myriam%20Lahmi.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a boxing coach who builds her training on values of respect, consistency, courage, confidence, and stability. Her supportive approach creates an environment where fighters at every level can grow with discipline and intention.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Myriam Lahmi</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697b5ac7b18d7935ef5c8a98_Barak%20Zehavi.jpg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a breathwork and cold exposure guide who uses practice to cultivate balance between body and mind, addressing anxiety and supporting recovery through intentional work with breath, heat, and cold.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Barak Zehavi</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697b5a994391591e972af88c_Arthur%20Abramov.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a boxing coach with over a decade of experience. Israeli heavyweight champion with international competitive background. Combines conditioning, endurance, strength, and technique in a focused training method.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Arthur Abramov</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697730e31e04197a1dea30b4_Yoel%20Eini.png')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">approaches boxing as more than a sport. He uses training as a practice of breath, focus, resilience, and inner strength. His classes sharpen both mind and body through disciplined, classical boxing technique.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Yoel Eini</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/697730b3d50cc16bbb2a336d_Adam%20Hadad.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">began boxing at age 12 and competed for the Australian national team. Trained under world-leading coaches and has coached fighters to national and international titles, including one undisputed world champion.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Adam Haddad</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/69773080a45e39edc359385a_Roni%20Shtraus.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a yoga and movement teacher from a competitive athletic background. Her teaching highlights releasing outcomes to access strength and ease through yoga and movement practice.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Roni Strauss</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/69773044e0bb3e061ddf6582_May%20Meital.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is an Ashtanga and Vinyasa yoga teacher with over 10 years of practice and teaching, with an acrobatics background. Movement is her primary language for connection and clarity.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">May Meital</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/69772fe5f32d48fb79dacfd4_Leehe%20kandell.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is an Ashtanga and Vinyasa yoga teacher with nearly six years of teaching experience and a background in dance. Her practice is light, fluid, and grounded, balancing precision with ease and presence.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Leehe Kandell</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/69772f6d16c8a77d333b4dc7_Roni%20Gozali.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a movement teacher combining martial arts, yoga, acrobatics, and dance. She approaches movement as a tool for self-discovery and personal growth.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Roni Gozali</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/69772dd72d50fdb180ac94a5_Yifath%20Vardi.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a professional dancer, movement teacher, and independent creator. His work draws from dance, martial arts, and somatic practice to create an integrated approach to movement.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Iftach Vardi</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trainer-card">
+            <div class="trainer-image" style="background-image: url('https://cdn.prod.website-files.com/68d7b102c2950a7075801556/69772f29ec059323a7435925_Gil%20Barshad.jpeg')"></div>
+            <div class="trainer-overlay"></div>
+            <div class="trainer-content">
+                <div class="trainer-about">is a Vinyasa yoga teacher and movement instructor. His dynamic practice is inspired by capoeira, gymnastics, and functional training, bringing flow and creativity to every session.</div>
+                <div class="trainer-bottom">
+                    <div class="trainer-name">Gil Barshad</div>
+                    <div class="trainer-icon"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Become a Member -->
+    <section class="cta-banner">
+        <div class="cta-banner-bg"></div>
+        <div class="cta-banner-overlay"></div>
+        <h2>Become<br>a Member</h2>
+        <a href="join.html" class="btn btn--primary btn--large">Join De Club</a>
+    </section>
+
+    <!-- Footer Tagline -->
+    <div class="footer-tagline">
+        <p>If you're here, you already know.</p>
+    </div>
+
+    <!-- Social Icons -->
+    <div class="social-icons">
+        <a href="https://instagram.com/declub_tlv" target="_blank" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="https://facebook.com/declub.tlv" target="_blank" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="https://wa.me/15512399833?text=%D7%94%D7%99%D7%99%20%D7%93%D7%94%20%D7%A7%D7%9C%D7%90%D7%91%20%3A%29" target="_blank" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand"><img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68cff1151ce82cd6aef9bf30_logo-declub.svg" alt="De Club" class="footer-logo-img"><p class="footer-address">2 Bar-Giyora St.<br>Tel Aviv, Israel</p></div>
+                <div class="footer-nav"><span class="footer-heading">Floors</span><a href="vuca.html">VUCA · Boxing</a><a href="art.html">ART · Movement</a><a href="livo.html">LIVO · Recovery</a><a href="echo.html">ECHO · Lounge</a></div>
+                <div class="footer-nav"><span class="footer-heading">Club</span><a href="community.html">Community</a><a href="join.html">Membership</a><a href="index.html#experience">The Experience</a></div>
+                <div class="footer-nav"><span class="footer-heading">Connect</span><a href="https://instagram.com/declub_tlv" target="_blank">Instagram</a><a href="https://wa.me/15512399833?text=%D7%94%D7%99%D7%99%20%D7%93%D7%94%20%D7%A7%D7%9C%D7%90%D7%91%20%3A%29" target="_blank">WhatsApp</a><a href="tel:+972542077057">Call Us</a></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2025 De Club. All Rights Reserved.</p><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
+        </div>
+    </footer>
+
+    <script>
+        // Nav & menu
+        const nav = document.getElementById('nav');
+        const menuBtn = document.getElementById('menuBtn');
+        const menuOverlay = document.getElementById('menuOverlay');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80) nav.classList.add('nav--scrolled');
+            else nav.classList.remove('nav--scrolled');
+        });
+        menuBtn.addEventListener('click', () => {
+            menuOverlay.classList.toggle('active');
+            menuBtn.classList.toggle('active');
+        });
+        menuOverlay.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                menuOverlay.classList.remove('active');
+                menuBtn.classList.remove('active');
+            });
+        });
+    </script>
+
+    <!-- Contact Modal -->
+    <div class="modal-backdrop" id="contactModal">
+        <div class="modal">
+            <button class="modal-close" id="modalClose" aria-label="Close"></button>
+            <div id="modalFormWrap">
+                <h2 class="modal-title">Let's Talk</h2>
+                <p class="modal-sub">Leave your details and we'll reach out to schedule your visit.</p>
+                <form class="modal-form" id="contactForm">
+                    <input type="text" class="modal-input" name="name" placeholder="Your Name" required>
+                    <input type="tel" class="modal-input" name="phone" placeholder="Phone Number" required>
+                    <input type="email" class="modal-input" name="email" placeholder="Email Address" required>
+                    <button type="submit" class="modal-submit">Get in Touch</button>
+                </form>
+                <div class="modal-divider">or</div>
+                <a href="https://wa.me/972542077057?text=Hey%20De%20Club%20%3A)%20I%27d%20love%20to%20hear%20more" target="_blank" class="modal-whatsapp">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Talk with us now
+                </a>
+            </div>
+            <div class="modal-success" id="modalSuccess">
+                <div class="modal-success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <h3>We Got You</h3>
+                <p>We'll be in touch soon to set up your visit.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Contact Modal Logic
+    (function() {
+        const modal = document.getElementById('contactModal');
+        const closeBtn = document.getElementById('modalClose');
+        const form = document.getElementById('contactForm');
+        const formWrap = document.getElementById('modalFormWrap');
+        const success = document.getElementById('modalSuccess');
+
+        function openModal(e) {
+            e.preventDefault();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                formWrap.style.display = '';
+                success.classList.remove('show');
+                form.reset();
+            }, 350);
+        }
+
+        document.querySelectorAll('a[href*="join.html"], a.nav-link--cta, .btn--primary, .btn--ghost').forEach(link => {
+            if (link.closest('.footer-nav') || link.href?.includes('wa.me') || link.href?.includes('whatsapp')) return;
+            link.addEventListener('click', openModal);
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            const name = data.get('name');
+            const phone = data.get('phone');
+            const email = data.get('email');
+            fetch('https://n8n.declub.co.il/webhook/446c500d-6649-4f06-bc06-59dbd087b6e4', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone, email, source: window.location.pathname, url: window.location.href, utm_source: new URLSearchParams(window.location.search).get('utm_source') || '', utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || '', utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || '', utm_content: new URLSearchParams(window.location.search).get('utm_content') || '', utm_term: new URLSearchParams(window.location.search).get('utm_term') || '', referrer: document.referrer }) }).catch(() => {});
+            formWrap.style.display = 'none';
+            success.classList.add('show');
+            setTimeout(closeModal, 3000);
+        });
+    })();
+    </script>
+</body>
+</html>

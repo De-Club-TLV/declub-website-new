@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Club | Boxing · Movement · Recovery · Tel Aviv</title>
+    <meta name="description" content="De Club is Tel Aviv's concept wellness club. Three floors. One system. Boxing, movement, and recovery designed for people who refuse to slow down.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68dcb8f8b879f248a9f4ce19_favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68dcb9067610447c199b77ee_webclip.png">
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-inner">
+            <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68cff1151ce82cd6aef9bf30_logo-declub.svg" alt="De Club" class="preloader-logo">
+            <div class="preloader-bar"><div class="preloader-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <a href="#" class="nav-logo">
+            <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68cff1151ce82cd6aef9bf30_logo-declub.svg" alt="De Club" class="nav-logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="#about" class="nav-link">Who We Are</a>
+            <a href="#floors" class="nav-link">The Floors</a>
+            <a href="community.html" class="nav-link">Community</a>
+            <a href="join.html" class="nav-link nav-link--cta">Become a Member</a>
+        </div>
+        <button class="nav-menu-btn" id="menuBtn" aria-label="Open menu">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-overlay-content">
+            <a href="#about" class="menu-link" data-index="01">Who We Are</a>
+            <a href="#floors" class="menu-link" data-index="02">The Floors</a>
+            <div class="menu-sub-links">
+                <a href="vuca.html" class="menu-sub-link">VUCA · Boxing</a>
+                <a href="art.html" class="menu-sub-link">ART · Movement</a>
+                <a href="livo.html" class="menu-sub-link">LIVO · Recovery</a>
+                <a href="echo.html" class="menu-sub-link">ECHO · Lounge</a>
+            </div>
+            <a href="community.html" class="menu-link" data-index="03">Community</a>
+            <a href="join.html" class="menu-link" data-index="04">Become a Member</a>
+        </div>
+        <div class="menu-overlay-footer">
+            <div class="menu-socials">
+                <a href="https://instagram.com/declub.tlv" target="_blank">Instagram</a>
+                <a href="https://facebook.com" target="_blank">Facebook</a>
+                <a href="https://wa.me/15512399833?text=%D7%94%D7%99%D7%99%20%D7%93%D7%94%20%D7%A7%D7%9C%D7%90%D7%91%20%3A%29" target="_blank">WhatsApp</a>
+            </div>
+            <p class="menu-address">2 Bar-Giyora St., Tel Aviv</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-video-wrap">
+            <video class="hero-video" autoplay muted loop playsinline>
+                <source src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a%2F69707b135a0f10988d719a2d_declub-homepage_mp4.mp4" type="video/mp4">
+                <source src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a%2F69707b135a0f10988d719a2d_declub-homepage_webm.webm" type="video/webm">
+            </video>
+            <div class="hero-video-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="hero-title-line">Your Body.</span>
+                <span class="hero-title-line">Your Ritual. <em>Your Club.</em></span>
+            </h1>
+            <p class="hero-sub">Wellness as a way of life. Boxing, movement, and recovery under one roof. A place that feels like nothing else.</p>
+            <div class="hero-ctas">
+                <a href="join.html" class="btn btn--primary">Become a Member</a>
+                <a href="join.html#trial" class="btn btn--ghost">Book a Free Workout</a>
+            </div>
+        </div>
+        <div class="hero-scroll-indicator">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-left">
+                    <span class="section-tag">Who We Are</span>
+                    <h2 class="section-title">Not a gym.<br>Not a spa.<br><em>A system.</em></h2>
+                </div>
+                <div class="about-right">
+                    <p class="about-text">De Club is a concept wellness club built for people who live between contrasting states. Pushing limits in the morning, finding stillness in the afternoon, and coming back for more.</p>
+                    <p class="about-text">Across three floors, we've designed a single ecosystem where boxing, precision movement, and deep recovery aren't separate activities. They're one practice.</p>
+                    <p class="about-highlight">Self-care in motion is at our core.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floors Section — Isometric 3D Building -->
+    <section class="floors" id="floors">
+        <div class="container">
+            <div class="floors-header">
+                <span class="section-tag">The Four Floors</span>
+                <h2 class="section-title">One club.<br>Four worlds.</h2>
+                <p class="floors-intro">Each floor is designed for a different state of being. Together, they form a complete system for your body and mind.</p>
+            </div>
+        </div>
+
+        <div class="floors-building">
+            <div class="floors-building-inner">
+                <!-- Floor Labels -->
+                <div class="floor-label floor-label--top" id="floorLabelTop">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c1784fff62076d2122ee0_icon-livo-clean.svg" alt="" class="floor-label-icon">
+                    <div class="floor-label-text">
+                        <h3 class="floor-label-name">LIVO</h3>
+                        <p class="floor-label-tagline">Recovery Through Ritual</p>
+                        <a href="livo.html" class="floor-label-link">View Floor</a>
+                    </div>
+                </div>
+
+                <div class="floor-label floor-label--middle" id="floorLabelMiddle">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c1784771cb003f4cfc649_icon-flow-clean.svg" alt="" class="floor-label-icon">
+                    <div class="floor-label-text">
+                        <h3 class="floor-label-name">ART</h3>
+                        <p class="floor-label-tagline">Precision Through Motion</p>
+                        <a href="art.html" class="floor-label-link">View Floor</a>
+                    </div>
+                </div>
+
+                <div class="floor-label floor-label--bottom" id="floorLabelBottom">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c178404867c5b7d143616_icon-vuca-clean.svg" alt="" class="floor-label-icon">
+                    <div class="floor-label-text">
+                        <h3 class="floor-label-name">VUCA</h3>
+                        <p class="floor-label-tagline">Clarity Through Chaos</p>
+                        <a href="vuca.html" class="floor-label-link">View Floor</a>
+                    </div>
+                </div>
+
+                <div class="floor-label floor-label--base" id="floorLabelBase">
+                    <span class="floor-label-icon-text">&#9834;</span>
+                    <div class="floor-label-text">
+                        <h3 class="floor-label-name">ECHO</h3>
+                        <p class="floor-label-tagline">Connection Through Sound</p>
+                        <a href="echo.html" class="floor-label-link">View Floor</a>
+                    </div>
+                </div>
+
+                <!-- Isometric Floor SVGs -->
+                <div class="floor-svg floor-svg--top" id="floorTop">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/69341ecdb2bf42726d44fef9_livo-floor.svg" alt="LIVO Floor">
+                </div>
+                <div class="floor-svg floor-svg--middle" id="floorMiddle">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/69341eb7af17f8cbbfc77040_flow-floor.svg" alt="ART Floor">
+                </div>
+                <div class="floor-svg floor-svg--bottom" id="floorBottom">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/69341e8f58310d0034ce9cdf_vuca-floor.svg" alt="VUCA Floor">
+                </div>
+                <div class="floor-svg floor-svg--base" id="floorBase">
+                    <img src="echo-floor.svg" alt="ECHO Floor">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floor Detail Cards (below the building) -->
+    <section class="floor-cards">
+        <div class="container">
+            <div class="floor-cards-grid">
+                <div class="floor-card">
+                    <div class="floor-card-header">
+                        <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c178404867c5b7d143616_icon-vuca-clean.svg" alt="" class="floor-card-icon">
+                        <span class="floor-card-number">01</span>
+                    </div>
+                    <h3 class="floor-card-name">VUCA</h3>
+                    <p class="floor-card-tagline">Clarity Through Chaos</p>
+                    <p class="floor-card-desc">Boxing. High-intensity training. Controlled aggression. This is where you face the chaos and come out sharper.</p>
+                    <div class="floor-card-tags">
+                        <span>Boxing</span>
+                        <span>HIIT</span>
+                        <span>Bag Work</span>
+                        <span>Sparring</span>
+                    </div>
+                </div>
+                <div class="floor-card">
+                    <div class="floor-card-header">
+                        <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c1784771cb003f4cfc649_icon-flow-clean.svg" alt="" class="floor-card-icon">
+                        <span class="floor-card-number">02</span>
+                    </div>
+                    <h3 class="floor-card-name">ART</h3>
+                    <p class="floor-card-tagline">Precision Through Motion</p>
+                    <p class="floor-card-desc">Functional movement. Mobility. Bodyweight mastery. Every movement is intentional, every session builds something that lasts.</p>
+                    <div class="floor-card-tags">
+                        <span>Movement</span>
+                        <span>Mobility</span>
+                        <span>Functional</span>
+                        <span>Bodyweight</span>
+                    </div>
+                </div>
+                <div class="floor-card">
+                    <div class="floor-card-header">
+                        <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/691c1784fff62076d2122ee0_icon-livo-clean.svg" alt="" class="floor-card-icon">
+                        <span class="floor-card-number">03</span>
+                    </div>
+                    <h3 class="floor-card-name">LIVO</h3>
+                    <p class="floor-card-tagline">Recovery Through Ritual</p>
+                    <p class="floor-card-desc">Cold plunge. Sauna. Breathwork. Bodywork. Active recovery designed to rebuild you faster so you can show up again tomorrow.</p>
+                    <div class="floor-card-tags">
+                        <span>Cold Plunge</span>
+                        <span>Sauna</span>
+                        <span>Breathwork</span>
+                        <span>Bodywork</span>
+                    </div>
+                </div>
+                <div class="floor-card">
+                    <div class="floor-card-header">
+                        <span class="floor-card-icon-text">&#9834;</span>
+                        <span class="floor-card-number">-1</span>
+                    </div>
+                    <h3 class="floor-card-name">ECHO</h3>
+                    <p class="floor-card-tagline">Connection Through Sound</p>
+                    <p class="floor-card-desc">A lounge built around world-class sound. The place where conversations happen, ideas connect, and community comes alive.</p>
+                    <div class="floor-card-tags">
+                        <span>Lounge</span>
+                        <span>Sound System</span>
+                        <span>Community</span>
+                        <span>Events</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DeBox Section -->
+    <section class="debox" id="debox">
+        <div class="container">
+            <div class="debox-grid">
+                <div class="debox-content">
+                    <span class="section-tag">Right Outside</span>
+                    <h2 class="section-title">DeBox<br><em>Coffee & Kitchen</em></h2>
+                    <p class="debox-text">Your workout starts and ends here. DeBox is our coffee and kitchen bar right at the entrance of De Club, offering specialty coffee, matcha, healthy drinks, and fresh food made for people who take care of themselves.</p>
+                    <p class="debox-text">Open to members and the neighborhood alike. Grab something before training, refuel after, or just sit down and be part of the energy.</p>
+                    <div class="debox-highlights">
+                        <div class="debox-item">
+                            <span class="debox-item-icon">&#9679;</span>
+                            <span>Specialty coffee & matcha</span>
+                        </div>
+                        <div class="debox-item">
+                            <span class="debox-item-icon">&#9679;</span>
+                            <span>Fresh healthy food</span>
+                        </div>
+                        <div class="debox-item">
+                            <span class="debox-item-icon">&#9679;</span>
+                            <span>Smoothies & wellness drinks</span>
+                        </div>
+                        <div class="debox-item">
+                            <span class="debox-item-icon">&#9679;</span>
+                            <span>Open to everyone</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="debox-visual">
+                    <div class="debox-image-placeholder">
+                        <span class="debox-placeholder-text">DeBox</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section class="experience" id="experience">
+        <div class="container">
+            <div class="experience-header">
+                <span class="section-tag">The Experience</span>
+                <h2 class="section-title">Your day at<br>De Club</h2>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-time">06:30</div>
+                    <div class="timeline-content">
+                        <h4>Morning Heat</h4>
+                        <p>Start with boxing or HIIT on the VUCA floor. Wake up your nervous system. Set the tone for everything that follows.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">08:00</div>
+                    <div class="timeline-content">
+                        <h4>Move & Build</h4>
+                        <p>Drop into the ART floor for a mobility session or functional training. Precision work that makes your body smarter.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">12:30</div>
+                    <div class="timeline-content">
+                        <h4>Midday Reset</h4>
+                        <p>Lunch break cold plunge and sauna on LIVO. 20 minutes that change the rest of your day.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">18:00</div>
+                    <div class="timeline-content">
+                        <h4>Evening Session</h4>
+                        <p>Come back for a group class, solo training, or deep recovery. The club adapts to your rhythm, not the other way around.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial / Pull Quote -->
+    <section class="pull-quote">
+        <div class="container">
+            <blockquote class="quote">
+                <p>"I used to think training and recovery were separate things. De Club showed me they're the same thing."</p>
+                <cite>De Club Member, Tel Aviv</cite>
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- What Moves Us -->
+    <section class="philosophy" id="philosophy">
+        <div class="container">
+            <div class="philosophy-grid">
+                <div class="philosophy-left">
+                    <span class="section-tag">What Moves Us</span>
+                    <h2 class="section-title">Built for<br>the <em>everyday</em></h2>
+                </div>
+                <div class="philosophy-right">
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-trigger">
+                                <span>Consistency over intensity</span>
+                                <span class="accordion-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>We don't believe in burning out. De Club is designed so you can come every single day. Sometimes to push, sometimes to recover, always to show up for yourself.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-trigger">
+                                <span>Contrasts create balance</span>
+                                <span class="accordion-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Chaos and stillness. Power and precision. Heat and cold. We believe the tension between opposites is where real growth happens.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-trigger">
+                                <span>Recovery is not optional</span>
+                                <span class="accordion-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>An entire floor dedicated to recovery isn't a luxury. It's the foundation. You can't train hard if you don't recover harder.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-trigger">
+                                <span>Community is the multiplier</span>
+                                <span class="accordion-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <p>The people around you shape your practice. De Club attracts people who are serious about showing up, and that energy is contagious.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA / Join Section -->
+    <section class="join" id="join">
+        <div class="join-bg"></div>
+        <div class="container">
+            <div class="join-content">
+                <span class="section-tag section-tag--light">Become a Member</span>
+                <h2 class="join-title">Ready to feel the difference?</h2>
+                <p class="join-text">Membership gives you unlimited access to all three floors. Boxing, movement, and recovery. One club. Every day. No limits.</p>
+                <div class="join-features">
+                    <div class="join-feature">
+                        <span class="join-feature-icon">&#9632;</span>
+                        <span>Full access to VUCA, ART & LIVO</span>
+                    </div>
+                    <div class="join-feature">
+                        <span class="join-feature-icon">&#9632;</span>
+                        <span>40+ weekly group classes</span>
+                    </div>
+                    <div class="join-feature">
+                        <span class="join-feature-icon">&#9632;</span>
+                        <span>Recovery suite included</span>
+                    </div>
+                    <div class="join-feature">
+                        <span class="join-feature-icon">&#9632;</span>
+                        <span>Open 6 AM to 10 PM daily</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+                    <a href="join.html" class="btn btn--primary btn--large">Apply for Membership</a>
+                    <a href="join.html#trial" class="btn btn--ghost btn--large">Book a Free Tour</a>
+                </div>
+                <p class="join-note">Not sure yet? Come see the space. Your first workout is on us.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="https://cdn.prod.website-files.com/68cff027ea83674e59a4438a/68cff1151ce82cd6aef9bf30_logo-declub.svg" alt="De Club" class="footer-logo-img">
+                    <p class="footer-address">2 Bar-Giyora St.<br>Tel Aviv, Israel</p>
+                </div>
+                <div class="footer-nav">
+                    <span class="footer-heading">Navigate</span>
+                    <a href="#about">Who We Are</a>
+                    <a href="#floors">The Floors</a>
+                    <a href="community.html">Community</a>
+                    <a href="join.html">Membership</a>
+                </div>
+                <div class="footer-nav">
+                    <span class="footer-heading">Floors</span>
+                    <a href="vuca.html">VUCA · Boxing</a>
+                    <a href="art.html">ART · Movement</a>
+                    <a href="livo.html">LIVO · Recovery</a>
+                    <a href="echo.html">ECHO · Lounge</a>
+                </div>
+                <div class="footer-nav">
+                    <span class="footer-heading">Connect</span>
+                    <a href="https://instagram.com/declub.tlv" target="_blank">Instagram</a>
+                    <a href="https://facebook.com" target="_blank">Facebook</a>
+                    <a href="https://wa.me/15512399833?text=%D7%94%D7%99%D7%99%20%D7%93%D7%94%20%D7%A7%D7%9C%D7%90%D7%91%20%3A%29" target="_blank">WhatsApp</a>
+                    <a href="tel:+972542077057">Call Us</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 De Club. All Rights Reserved.</p>
+                <div class="footer-legal">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- Contact Modal -->
+    <div class="modal-backdrop" id="contactModal">
+        <div class="modal">
+            <button class="modal-close" id="modalClose" aria-label="Close"></button>
+            <div id="modalFormWrap">
+                <h2 class="modal-title">Let's Talk</h2>
+                <p class="modal-sub">Leave your details and we'll reach out to schedule your visit.</p>
+                <form class="modal-form" id="contactForm">
+                    <input type="text" class="modal-input" name="name" placeholder="Your Name" required>
+                    <input type="tel" class="modal-input" name="phone" placeholder="Phone Number" required>
+                    <input type="email" class="modal-input" name="email" placeholder="Email Address" required>
+                    <button type="submit" class="modal-submit">Get in Touch</button>
+                </form>
+                <div class="modal-divider">or</div>
+                <a href="https://wa.me/972542077057?text=Hey%20De%20Club%20%3A)%20I%27d%20love%20to%20hear%20more" target="_blank" class="modal-whatsapp">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Talk with us now
+                </a>
+            </div>
+            <div class="modal-success" id="modalSuccess">
+                <div class="modal-success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <h3>We Got You</h3>
+                <p>We'll be in touch soon to set up your visit.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+    // Contact Modal Logic
+    (function() {
+        const modal = document.getElementById('contactModal');
+        const closeBtn = document.getElementById('modalClose');
+        const form = document.getElementById('contactForm');
+        const formWrap = document.getElementById('modalFormWrap');
+        const success = document.getElementById('modalSuccess');
+
+        function openModal(e) {
+            e.preventDefault();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            // Reset after animation
+            setTimeout(() => {
+                formWrap.style.display = '';
+                success.classList.remove('show');
+                form.reset();
+            }, 350);
+        }
+
+        // Wire all CTA buttons (any link to join.html or with btn--primary/btn--ghost class pointing to join)
+        document.querySelectorAll('a[href*="join.html"], a.nav-link--cta, .btn--primary, .btn--ghost').forEach(link => {
+            // Skip footer nav links and WhatsApp links
+            if (link.closest('.footer-nav') || link.href?.includes('wa.me') || link.href?.includes('whatsapp')) return;
+            link.addEventListener('click', openModal);
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Collect form data
+            const data = new FormData(form);
+            const name = data.get('name');
+            const phone = data.get('phone');
+            const email = data.get('email');
+            fetch('https://n8n.declub.co.il/webhook/446c500d-6649-4f06-bc06-59dbd087b6e4', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone, email, source: window.location.pathname, url: window.location.href, utm_source: new URLSearchParams(window.location.search).get('utm_source') || '', utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || '', utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || '', utm_content: new URLSearchParams(window.location.search).get('utm_content') || '', utm_term: new URLSearchParams(window.location.search).get('utm_term') || '', referrer: document.referrer }) }).catch(() => {});
+
+            // Show success state
+            formWrap.style.display = 'none';
+            success.classList.add('show');
+
+            // Auto close after 3s
+            setTimeout(closeModal, 3000);
+        });
+    })();
+    </script>
+</body>
+</html>
