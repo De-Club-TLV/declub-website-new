@@ -5,8 +5,6 @@ De Club is a wellness club in Tel Aviv (2 Bar-Giyora St.) combining boxing, move
 
 ## Tech Stack
 - **Static HTML/CSS/JS** (no build step, no framework)
-- **Hosted on Netlify**: https://declub-new.netlify.app
-- **Netlify Site ID**: `57d0d849-9bc1-46ac-a496-d3e82613613b`
 - **GitHub**: https://github.com/danadika-1/declub-website
 - **Original site reference**: https://declub.co.il (built on Webflow)
 
@@ -63,17 +61,7 @@ All images are hotlinked from the original Webflow CDN:
 Trainer photos, floor images, gallery images, and hero backgrounds all come from these CDN URLs.
 
 ## Deployment
-Static deploy to Netlify. No build command needed.
-
-```bash
-# Zip and deploy
-cd "/Users/danadika/DeClub Website"
-zip -r /tmp/declub-deploy.zip . -x ".*" ".claude/*"
-curl -s -X POST "https://api.netlify.com/api/v1/sites/57d0d849-9bc1-46ac-a496-d3e82613613b/deploys" \
-  -H "Authorization: Bearer YOUR_NETLIFY_TOKEN" \
-  -H "Content-Type: application/zip" \
-  --data-binary @/tmp/declub-deploy.zip
-```
+Static site, no build command needed.
 
 ## Contact Info
 - **Phone**: +972542077057
