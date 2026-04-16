@@ -54,14 +54,20 @@ Payload includes UTM tracking:
 ```
 
 ## Images & Assets
-All images are hotlinked from the original Webflow CDN:
-- `cdn.prod.website-files.com/68cff027ea83674e59a4438a/` (site assets)
-- `cdn.prod.website-files.com/68d7b102c2950a7075801556/` (CMS/dynamic assets)
+All images are self-hosted in the `assets/` directory:
+- `assets/images/logos/` - Logo SVG, favicon, webclip
+- `assets/images/icons/` - Floor icons (VUCA, FLOW, LIVO)
+- `assets/images/heroes/` - Page hero backgrounds
+- `assets/images/floors/` - Floor diagrams and highlights
+- `assets/images/gallery/{vuca,art,livo}/` - Floor gallery images
+- `assets/images/trainers/` - 14 trainer photos
 
-Trainer photos, floor images, gallery images, and hero backgrounds all come from these CDN URLs.
+**Exception**: Homepage hero video (MP4 + WebM) still served from Webflow CDN due to file size.
 
 ## Deployment
-Static site, no build command needed.
+- **Hosting**: Netlify (auto-deploys from `main` branch)
+- **Live URL**: https://de-club.netlify.app/
+- Static site, no build command needed.
 
 ## Contact Info
 - **Phone**: +972542077057
