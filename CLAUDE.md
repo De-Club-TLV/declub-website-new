@@ -5,7 +5,7 @@ De Club is a wellness club in Tel Aviv (2 Bar-Giyora St.) combining boxing, move
 
 ## Tech Stack
 - **Static HTML/CSS/JS** (no build step, no framework)
-- **GitHub**: https://github.com/danadika-1/declub-website
+- **GitHub**: https://github.com/De-Club-TLV/declub-website-new
 - **Original site reference**: https://declub.co.il (built on Webflow)
 
 ## Pages
