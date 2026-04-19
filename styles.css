@@ -1653,6 +1653,11 @@ em {
         gap: 16px;
         text-align: center;
     }
+
+    .floor-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 
 @media (max-width: 480px) {
