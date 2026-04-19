@@ -1,9 +1,41 @@
 # Session Log
 
 ## Spend to date
-- Sessions: 1
-- Tokens (in / out / cache-read): est. ~50k / ~30k / ~200k
-- Cost: est. ~$3.00
+- Sessions: 2
+- Tokens (in / out / cache-read): 784 / 208,629 / 38,416,920
+- Cost: $104.7394
+
+---
+
+## 2026-04-19
+
+**Focus:** Legal pages live, mobile polish, copy edits, declub.co.il DNS cutover, repo governance
+
+**Done:**
+- Built `privacy.html` + `terms.html` from lawyer-drafted Hebrew PDFs — RTL content, LTR nav/footer, scoped `.legal-*` styles in `pages.css`
+- Wired footer Privacy/Terms links across all 7 existing pages (were `href="#"`)
+- Stacked `.floor-cards-grid` to single-column at ≤768px (was 2-col)
+- Added "longevity" to homepage hero subtitle, about paragraph, and LIVO hero description
+- **DNS cutover**: pointed `declub.co.il` (apex A → 75.2.60.5) and `www.declub.co.il` (CNAME → de-club.netlify.app) at Netlify via Cloudways DNS Made Easy MCP. Preserved `n8n.declub.co.il`, MX/Google Workspace, SendGrid DKIM, `join.declub.co.il` (still on Webflow), Facebook/Google verification TXT records
+- Made GitHub repo **public** (required for free-tier branch protection)
+- Demoted `danadika-1` from admin → write
+- Added `.github/CODEOWNERS` (`* @mr-katz99`)
+- Created "Protect main" ruleset: PR required, 1 approval, code-owner review required, non-fast-forward + deletion blocked, Admin role can bypass
+
+**Decisions:**
+- Netlify MCP has no "add custom domain" operation — Yuval added it via Netlify UI, then I did the DNS part
+- DNS Made Easy rejected `ANAME` via API despite enum support, fell back to A → 75.2.60.5 (Netlify published IP)
+- `join.declub.co.il` intentionally kept on Webflow (Yuval's separate landing page)
+- Chose branch ruleset over fork workflow — less friction for Dan, still gated
+
+**Next:**
+- Update hardcoded `de-club.netlify.app` → `declub.co.il` in OG/Twitter meta tags across all 9 HTML files
+- Verify Netlify SSL cert issued + pick primary custom domain (apex vs www — Netlify recommends www for CDN benefits)
+- Self-host hero video off Webflow CDN (Cloudflare R2 candidate) — carryover from last session
+- Analytics/tracking pixel still pending
+- Trial-class purchase option on site (overdue Monday task #2737401971)
+
+**Spend:** $85.1384 this session · tokens in/out/cache-read: 548 / 151,624 / 32,981,541
 
 ---
 
@@ -31,4 +63,4 @@
 - Add analytics/tracking pixel
 - Consider downloading and self-hosting the hero video to a proper CDN (Cloudflare R2, etc.)
 
-**Spend:** est. ~$3.00 this session (first session, no transcript baseline)
+**Spend:** $19.6010 this session · tokens in/out/cache-read: 236 / 57,005 / 5,435,379
