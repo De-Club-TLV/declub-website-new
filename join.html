@@ -245,56 +245,6 @@
         </div>
     </div>
 
-    <script>
-    // Contact Modal Logic
-    (function() {
-        const modal = document.getElementById('contactModal');
-        const closeBtn = document.getElementById('modalClose');
-        const form = document.getElementById('contactForm');
-        const formWrap = document.getElementById('modalFormWrap');
-        const success = document.getElementById('modalSuccess');
-
-        function openModal(e) {
-            e.preventDefault();
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            setTimeout(() => {
-                formWrap.style.display = '';
-                success.classList.remove('show');
-                form.reset();
-            }, 350);
-        }
-
-        document.querySelectorAll('a[href*="join.html"], a.nav-link--cta, .btn--primary, .btn--ghost').forEach(link => {
-            if (link.closest('.footer-nav') || link.href?.includes('wa.me') || link.href?.includes('whatsapp')) return;
-            link.addEventListener('click', openModal);
-        });
-
-        closeBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const data = new FormData(form);
-            const name = data.get('name');
-            const phone = data.get('phone');
-            const email = data.get('email');
-            fetch('https://n8n.declub.co.il/webhook/446c500d-6649-4f06-bc06-59dbd087b6e4', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone, email, source: window.location.pathname, url: window.location.href, utm_source: new URLSearchParams(window.location.search).get('utm_source') || '', utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || '', utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || '', utm_content: new URLSearchParams(window.location.search).get('utm_content') || '', utm_term: new URLSearchParams(window.location.search).get('utm_term') || '', referrer: document.referrer }) }).catch(() => {});
-            formWrap.style.display = 'none';
-            success.classList.add('show');
-            setTimeout(closeModal, 3000);
-        });
-    })();
-    </script>
+        <script src="contact-modal.js"></script>
 </body>
 </html>
