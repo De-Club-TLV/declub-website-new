@@ -1,19 +1,20 @@
 // De Club — Contact modal (shared across all pages)
 //
 // Handles modal open/close wiring, HMAC-SHA256 signing of the form payload,
-// and the POST to the n8n webhook. n8n verifies the signature before
-// forwarding to Trigger.dev. Keeps casual spam out; a motivated reader
-// of this source can extract WEBHOOK_HMAC_SECRET and forge payloads, but
-// blocking that tier requires a backend signer — separate scope.
+// and the POST to the Netlify Function that forwards to Trigger.dev's
+// `lead-intake` task. The function verifies the signature before forwarding.
+// Keeps casual spam out; a motivated reader of this source can extract
+// WEBHOOK_HMAC_SECRET and forge payloads, but blocking that tier requires
+// a backend signer (separate scope).
 
 (function () {
   'use strict';
 
-  // Keep this in sync with WEBHOOK_HMAC_SECRET in the n8n forwarder.
-  // Rotation: generate a new 32-byte hex secret, replace in three places
-  // (this file, n8n workflow env, General/.env), deploy website + save n8n.
+  // Shared secret: browser (this file) and Netlify Function env var
+  // WEBHOOK_HMAC_SECRET. Rotation: generate a new 32-byte hex, update here
+  // + Netlify env + General/.env, then deploy.
   var WEBHOOK_SECRET = 'ee1b24a44a6741f7b59d41b706b9f2dc660975259d3d07a4de7ed97a76784e45';
-  var WEBHOOK_URL = 'https://n8n.declub.co.il/webhook/446c500d-6649-4f06-bc06-59dbd087b6e4';
+  var WEBHOOK_URL = '/.netlify/functions/submit-lead';
 
   var modal = document.getElementById('contactModal');
   if (!modal) return;
@@ -115,7 +116,7 @@
         }).catch(function () {});
       } catch (err) {
         // Fallback: post without signature if Web Crypto unavailable.
-        // n8n will drop it; user still sees success UI, we just miss the lead.
+        // The function will drop it; user still sees success UI, we just miss the lead.
         fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
