@@ -7,6 +7,28 @@
 
 ---
 
+## 2026-04-24
+
+**Focus:** Migrate the contact-modal lead form off n8n onto a direct Netlify Function.
+
+**Done:**
+- Added `netlify/functions/submit-lead.ts`: HMAC-verifies the raw body with `WEBHOOK_HMAC_SECRET`, forwards the parsed JSON payload to `api.trigger.dev/api/v1/tasks/lead-intake/trigger`. Replaces the previous browser → `n8n.declub.co.il/webhook/446c500d-...` → Trigger.dev path.
+- `contact-modal.js`: swapped `WEBHOOK_URL` from the n8n webhook to `/.netlify/functions/submit-lead`. Browser still HMAC-signs the canonical JSON body with the same shared secret; the function HMACs the exact bytes received, so client canonicalization is immaterial on the server side.
+- Added `netlify.toml` (functions dir + esbuild bundler + X-Frame / Referrer security headers). Added `.netlify/` to `.gitignore`.
+- Set env vars on Netlify site `aadb4c4f-...`: `WEBHOOK_HMAC_SECRET`, `TRIGGER_PROD_SECRET_KEY`. Pushed commit `610e4a0`, auto-deployed, smoke-tested end-to-end (bad sig → 401, valid sig → 200 + `lead-intake` run completed + test Monday records deleted).
+
+**Decisions:**
+- Raw-body HMAC (browser signs exact bytes, server HMACs those same bytes) rather than re-canonicalizing on the server. Simpler and eliminates a class of "client and server disagree on canonical form" bugs.
+- n8n workflow `QRQLYlCH7XskWMwrfGhfj` (Website Lead Gen) stays running as a fallback for ~1 week. Deactivate (not delete) once real leads are verified landing via the new path.
+
+**Next:**
+- Deactivate the n8n Website Lead Gen workflow after verification window.
+- Rotate `WEBHOOK_HMAC_SECRET` (still from an earlier session's exposure).
+
+**Spend:** session spend logged in `General/SESSION_LOG.md` (cross-repo session: teacher-intake build + refactor + three form migrations).
+
+---
+
 ## 2026-04-19
 
 **Focus:** Legal pages live, mobile polish, copy edits, declub.co.il DNS cutover, repo governance
