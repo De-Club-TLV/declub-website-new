@@ -13,7 +13,7 @@
   // Shared secret: browser (this file) and Netlify Function env var
   // WEBHOOK_HMAC_SECRET. Rotation: generate a new 32-byte hex, update here
   // + Netlify env + General/.env, then deploy.
-  var WEBHOOK_SECRET = 'ee1b24a44a6741f7b59d41b706b9f2dc660975259d3d07a4de7ed97a76784e45';
+  var WEBHOOK_SECRET = '458094bae8debf2fa2a6eed653fa8d55e67b943e11ec1581556e21b02ba386ec';
   var WEBHOOK_URL = '/.netlify/functions/submit-lead';
 
   var modal = document.getElementById('contactModal');
