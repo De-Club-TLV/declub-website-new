@@ -1,9 +1,34 @@
 # Session Log
 
 ## Spend to date
-- Sessions: 2
-- Tokens (in / out / cache-read): 784 / 208,629 / 38,416,920
-- Cost: $104.7394
+- Sessions: 3
+- Tokens (in / out / cache-read): 874 / 238,008 / 40,859,523
+- Cost: $117.6592
+
+---
+
+## 2026-05-06
+
+**Focus:** Hotfix malformed WhatsApp links on the Join page.
+
+**Done:**
+- A real customer ("Shamir Barnett") sent a WhatsApp message that arrived with literal `text=?` text leaking into the body, exposing a bug in the prefilled-message URLs
+- Diagnosed `join.html`: each tier CTA (Explorer / Full Access / Day Pass / "WhatsApp Us") had `?text=<encoded>?text=<raw>`, so WhatsApp parsed everything past the first `?` as a single text value
+- Collapsed each href to one fully URL-encoded `text=` parameter (commit `f3953c2`), pushed straight to `main` (admin bypass on the Protect-main ruleset)
+
+**Decisions:**
+- No Monday sync this session — the bug wasn't a tracked task, and no human-action follow-ups surfaced. The customer already engaged via WhatsApp, so any sales follow-up belongs in the inbox, not a Monday item.
+
+**Next:**
+- Deactivate n8n Website Lead Gen workflow (`QRQLYlCH7XskWMwrfGhfj`) — verification window ended, real leads have been flowing through Netlify since 2026-04-24
+- OG/Twitter meta-tag sweep: replace hardcoded `de-club.netlify.app` → `declub.co.il` across all 9 HTML files
+- Implement trial-class purchase option on site (Monday #2737401971, overdue 7 weeks)
+- Self-host hero video off Webflow CDN (Cloudflare R2 candidate)
+- Analytics/tracking pixel still pending
+- SSL cert + primary-domain decision (apex vs www) on declub.co.il
+- Consider whether `main` should keep allowing admin bypass — current ruleset lets a single-line fix ship without a PR
+
+**Spend:** $12.9198 this session · tokens in/out/cache-read: 90 / 29,379 / 2,442,603
 
 ---
 
