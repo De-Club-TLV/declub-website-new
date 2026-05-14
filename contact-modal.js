@@ -126,6 +126,17 @@
 
       if (formWrap) formWrap.style.display = 'none';
       if (success) success.classList.add('show');
+
+      // GTM: announce conversion so the Lead Submit + Meta Lead tags fire.
+      // Fires on success-UI-shown (fire-and-forget on the network call, so
+      // pushing here matches what the user sees).
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'lead_submitted',
+        lead_source: 'contact_form',
+        lead_page: window.location.pathname,
+      });
+
       setTimeout(closeModal, 3000);
     });
   }
