@@ -82,6 +82,15 @@
     return new URLSearchParams(window.location.search).get(name) || '';
   }
 
+  // Meta Pixel click-attribution cookies. _fbp is set by fbevents.js on
+  // every visit; _fbc is set only when the user arrived via an `fbclid`
+  // in the URL (i.e. clicked a Meta ad). Passing both server-side to CAPI
+  // raises Meta's match rate from ~70% to ~90%.
+  function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : '';
+  }
+
   if (form) {
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -98,6 +107,8 @@
         utm_content: qs('utm_content'),
         utm_term: qs('utm_term'),
         referrer: document.referrer,
+        fbp: getCookie('_fbp'),
+        fbc: getCookie('_fbc'),
       };
       // Canonical JSON — keys sorted alphabetically — so the HMAC we compute
       // here matches what n8n reproduces after its JSON-parse step.
