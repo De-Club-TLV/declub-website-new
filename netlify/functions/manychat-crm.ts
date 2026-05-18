@@ -3,15 +3,24 @@ import { timingSafeEqual } from "node:crypto";
 // Netlify Function: handle ManyChat WA conversation-start flow. Two actions
 // dispatched via the `action` field:
 //
-//   1. action="greet" — looks up the Contact in Monday by phone. If found,
-//      returns existence + first_name so ManyChat can send a personalized
-//      `Hey {{first_name}}!`. If NOT found, creates the Contact + a fresh
-//      Lead (source=Manychat, type=Organic) and returns contact_id so
-//      ManyChat can collect a real name from the user.
+//   1. action="greet" — looks up the Contact in Monday by phone.
+//      • If found:    returns { exists: true, contact_id, first_name, last_name }
+//      • If NOT found: returns { exists: false }   (NO contact_id)
+//      The presence of `contact_id` in the response is the canonical signal
+//      ManyChat uses to branch its flow: contact_id set → existing user,
+//      send personalized greeting. contact_id missing → new user, collect
+//      their name then call action="create".
 //
-//   2. action="update_name" — called by ManyChat after the user replies with
-//      their name. Updates the Contact's name field, and re-titles the
-//      linked Lead row to match.
+//   2. action="create" — called by ManyChat AFTER the user has provided
+//      their name in the conversation. Creates a fresh Contact + Lead with
+//      the real name, source = Website (if user came via a wa.me link on
+//      declub.co.il, detected by "hi de club" prefix in last_input) or
+//      Manychat (default). Returns { contact_id, lead_id, name, source }.
+//
+// Why no placeholder Contact: an earlier design created a "WA Lead 1234"
+// Contact during greet and patched the name later. That left orphan
+// Contacts in CRM if the user dropped off before sending their name. The
+// current design only creates real records once we have real data.
 //
 // Architecture: this endpoint talks to Monday GraphQL directly rather than
 // going through Trigger.dev's `lead-intake` task. Reason: ManyChat needs a
@@ -236,10 +245,13 @@ async function renameItem(itemId: string, boardId: string, newName: string): Pro
 }
 
 // ─── Action: greet ────────────────────────────────────────────────────────
-// Body: { phone, first_name?, last_name?, subscriber_id? }
-// Lookup → branch:
-//   exists  → { exists: true, contact_id, first_name, last_name, name }
-//   new     → create Contact + Lead, return { exists: false, contact_id, lead_id }
+// Lookup-only. NO writes to Monday. ManyChat's flow branches on whether
+// `contact_id` is set in the response.
+//
+// Body: { phone }
+// Returns:
+//   exists  → { exists: true, contact_id, name, first_name, last_name }
+//   new     → { exists: false }    (no contact_id — that's the signal to ManyChat)
 async function handleGreet(payload: any): Promise<NetlifyResponse> {
   const phone = String(payload?.phone ?? "").trim();
   if (!phone) return json(400, { error: "missing phone" });
@@ -256,36 +268,54 @@ async function handleGreet(payload: any): Promise<NetlifyResponse> {
     });
   }
 
-  // New: build a name from whatever ManyChat passed; fall back to a phone-
-  // based placeholder so the Contact has a recognizable title before the
-  // user gives their real name in the next step.
-  const passedFirst = String(payload?.first_name ?? "").trim();
-  const passedLast = String(payload?.last_name ?? "").trim();
-  const composed = [passedFirst, passedLast].filter(Boolean).join(" ").trim();
-  const placeholder = `WA Lead ${phone.slice(-4)}`;
-  const initialName = composed || placeholder;
+  return json(200, { exists: false });
+}
 
-  // Source attribution: if the user's first message starts with the magic
-  // "Hey De Club" prefill, they clicked a wa.me link on declub.co.il →
-  // Source: Website. Otherwise they typed/arrived through some other path
-  // (saved contact, IG ad with WA-CTA, friend's referral, etc.) → default
-  // Source: Manychat (channel of contact).
+// ─── Action: create ───────────────────────────────────────────────────────
+// Called by ManyChat AFTER it's collected the user's name in the flow.
+// Creates a real Contact + Lead with that name. Skips creation if the
+// contact already exists (race-safety: ManyChat could in theory call this
+// after another path already created the Contact).
+//
+// Body: { phone, first_name, last_name?, last_input? }
+// Returns: { contact_id, lead_id, name, source }
+async function handleCreate(payload: any): Promise<NetlifyResponse> {
+  const phone = String(payload?.phone ?? "").trim();
+  const firstName = String(payload?.first_name ?? "").trim();
+  const lastName = String(payload?.last_name ?? "").trim();
+
+  if (!phone) return json(400, { error: "missing phone" });
+  if (!firstName) return json(400, { error: "missing first_name" });
+
+  // Race safety: re-lookup. If a Contact appeared between greet and create
+  // (e.g. parallel flow, user double-tapped, etc.), just return the
+  // existing record instead of creating a duplicate.
+  const existing = await lookupContactByPhone(phone);
+  if (existing) {
+    return json(200, {
+      contact_id: existing.contactId,
+      name: existing.name,
+      already_existed: true,
+    });
+  }
+
+  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+
+  // Source attribution from the prefilled wa.me marker (see header comment).
   const lastInput = String(payload?.last_input ?? "").trim().toLowerCase();
   const cameFromWebsite = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX);
   const sourceIndex = cameFromWebsite ? LEAD_SOURCE_WEBSITE : LEAD_SOURCE_MANYCHAT;
 
   const { contactId, leadId } = await createContactAndLead({
-    name: initialName,
+    name: fullName,
     phone,
     sourceIndex,
   });
 
   return json(200, {
-    exists: false,
     contact_id: contactId,
     lead_id: leadId,
-    name: initialName,
-    placeholder_used: !composed,
+    name: fullName,
     source: cameFromWebsite ? "Website" : "Manychat",
   });
 }
@@ -346,8 +376,9 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
   const action = String(payload?.action ?? "").trim();
   try {
     if (action === "greet") return await handleGreet(payload);
+    if (action === "create") return await handleCreate(payload);
     if (action === "update_name") return await handleUpdateName(payload);
-    return json(400, { error: `unknown action '${action}', expected 'greet' or 'update_name'` });
+    return json(400, { error: `unknown action '${action}', expected 'greet', 'create', or 'update_name'` });
   } catch (err) {
     return json(500, { error: (err as Error).message });
   }
