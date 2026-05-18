@@ -49,9 +49,12 @@ const LEAD_STATUS_NEW = 5;
 const CONTACT_TYPE_LEAD = 0;
 
 // Magic prefix in `last_input` that tells us the user clicked a wa.me link
-// on declub.co.il (every WA button on the site uses `?text=Hey%20De%20Club`).
+// on declub.co.il (every WA button on the site uses `?text=Hi%20De%20Club!`).
 // Lets us attribute Source=Website instead of Source=Manychat for these.
-const WEBSITE_WA_PREFILL_PREFIX = "hey de club";
+// Match on the lowercase prefix only (no trailing `!`) so variants like
+// "Hi De Club" (someone deleted the bang) or "Hi De Club! Looking for..."
+// (someone appended their question before sending) still attribute correctly.
+const WEBSITE_WA_PREFILL_PREFIX = "hi de club";
 
 interface NetlifyEvent {
   httpMethod?: string;
