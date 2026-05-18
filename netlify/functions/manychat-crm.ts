@@ -43,9 +43,15 @@ const CONTACT_LEAD_RELATION_COL = "board_relation_mkzy8749";
 // Monday label indices (LEAD_SOURCE / LEAD_TYPE / etc — mirror of
 // General/src/shared/monday.ts).
 const LEAD_SOURCE_MANYCHAT = 4;
+const LEAD_SOURCE_WEBSITE = 11;
 const LEAD_TYPE_ORGANIC = 0;
 const LEAD_STATUS_NEW = 5;
 const CONTACT_TYPE_LEAD = 0;
+
+// Magic prefix in `last_input` that tells us the user clicked a wa.me link
+// on declub.co.il (every WA button on the site uses `?text=Hey%20De%20Club`).
+// Lets us attribute Source=Website instead of Source=Manychat for these.
+const WEBSITE_WA_PREFILL_PREFIX = "hey de club";
 
 interface NetlifyEvent {
   httpMethod?: string;
@@ -137,6 +143,7 @@ function splitName(full: string): { first: string; last: string } {
 async function createContactAndLead(args: {
   name: string;
   phone: string;
+  sourceIndex: number;
 }): Promise<{ contactId: string; leadId: string }> {
   // Create Contact
   const contactCv: Record<string, unknown> = {
@@ -163,7 +170,7 @@ async function createContactAndLead(args: {
   const timeStr = now.toISOString().slice(11, 19);
   const leadCv: Record<string, unknown> = {
     [LEAD_STATUS_COL]: { index: LEAD_STATUS_NEW },
-    [LEAD_SOURCE_COL]: { index: LEAD_SOURCE_MANYCHAT },
+    [LEAD_SOURCE_COL]: { index: args.sourceIndex },
     [LEAD_TYPE_COL]: { index: LEAD_TYPE_ORGANIC },
     [LEAD_DATE_COL]: { date: dateStr, time: timeStr },
   };
@@ -255,9 +262,19 @@ async function handleGreet(payload: any): Promise<NetlifyResponse> {
   const placeholder = `WA Lead ${phone.slice(-4)}`;
   const initialName = composed || placeholder;
 
+  // Source attribution: if the user's first message starts with the magic
+  // "Hey De Club" prefill, they clicked a wa.me link on declub.co.il →
+  // Source: Website. Otherwise they typed/arrived through some other path
+  // (saved contact, IG ad with WA-CTA, friend's referral, etc.) → default
+  // Source: Manychat (channel of contact).
+  const lastInput = String(payload?.last_input ?? "").trim().toLowerCase();
+  const cameFromWebsite = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX);
+  const sourceIndex = cameFromWebsite ? LEAD_SOURCE_WEBSITE : LEAD_SOURCE_MANYCHAT;
+
   const { contactId, leadId } = await createContactAndLead({
     name: initialName,
     phone,
+    sourceIndex,
   });
 
   return json(200, {
@@ -266,6 +283,7 @@ async function handleGreet(payload: any): Promise<NetlifyResponse> {
     lead_id: leadId,
     name: initialName,
     placeholder_used: !composed,
+    source: cameFromWebsite ? "Website" : "Manychat",
   });
 }
 
