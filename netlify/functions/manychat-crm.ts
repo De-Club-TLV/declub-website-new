@@ -347,21 +347,22 @@ async function renameItem(itemId: string, boardId: string, newName: string): Pro
 //
 // Body: { phone }
 // Returns:
-//   exists  → { exists: true, contact_id, name, first_name, last_name }
+//   exists  → { exists: true, contact_id }
 //   new     → { exists: false }    (no contact_id — that's the signal to ManyChat)
+//
+// We deliberately don't return the CRM name back to ManyChat: for existing
+// contacts ManyChat already has the user's WA profile {{first_name}} which
+// is what we want for the personalized greeting. For new contacts we
+// collect Hebrew name in the chat and send via action="create".
 async function handleGreet(payload: any): Promise<NetlifyResponse> {
   const phone = String(payload?.phone ?? "").trim();
   if (!phone) return json(400, { error: "missing phone" });
 
   const existing = await lookupContactByPhone(phone);
   if (existing) {
-    const { first, last } = splitName(existing.name);
     return json(200, {
       exists: true,
       contact_id: existing.contactId,
-      name: existing.name,
-      first_name: first,
-      last_name: last,
     });
   }
 
