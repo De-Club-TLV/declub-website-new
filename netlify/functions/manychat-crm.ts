@@ -49,6 +49,8 @@ const LEAD_DATE_COL = "date_mkwg62xr";
 const LEAD_CONTACT_RELATION_COL = "board_relation_mkwaq2js";
 const CONTACT_LEAD_RELATION_COL = "board_relation_mkzy8749";
 
+const CONTACT_GENDER_COL = "color_mkwcfe01";
+
 // Monday label indices (LEAD_SOURCE / LEAD_TYPE / etc — mirror of
 // General/src/shared/monday.ts).
 const LEAD_SOURCE_MANYCHAT = 4;
@@ -56,6 +58,8 @@ const LEAD_SOURCE_WEBSITE = 11;
 const LEAD_TYPE_ORGANIC = 0;
 const LEAD_STATUS_NEW = 5;
 const CONTACT_TYPE_LEAD = 0;
+const CONTACT_GENDER_MALE = 0;
+const CONTACT_GENDER_FEMALE = 3;
 
 // Magic prefix in `last_input` that tells us the user clicked a wa.me link
 // on declub.co.il (every WA button on the site uses `?text=Hi%20De%20Club!`).
@@ -152,16 +156,109 @@ function splitName(full: string): { first: string; last: string } {
   return { first: parts[0] ?? "", last: parts.slice(1).join(" ") };
 }
 
+function containsHebrew(s: string): boolean {
+  return /[֐-׿יִ-ﭏ]/.test(s);
+}
+
+// Inline mirror of General/src/shared/translate.ts::analyzeName. Calls
+// Anthropic Claude Haiku via direct HTTP (no SDK dep) to phonetically
+// transliterate Hebrew names to English + detect gender. Used during
+// Contact creation so Monday's CRM stays English-only per project convention.
+//
+// Non-throwing: on any failure, falls back to {englishName: rawName,
+// gender: "female"}. Better to write a Hebrew-named Contact than refuse
+// to create one. The nightly crm-cleanup re-syncs names from Leads later.
+async function analyzeName(rawName: string): Promise<{ englishName: string; gender: "male" | "female" }> {
+  const trimmed = rawName.trim();
+  if (!trimmed) return { englishName: "", gender: "female" };
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    // No API key — return raw. Production deploy should always have it.
+    return { englishName: trimmed, gender: "female" };
+  }
+
+  // Skip the API call when input is purely Latin script — no transliteration
+  // needed. We still don't get a gender guess that way; default to female,
+  // crm-cleanup / sales can correct.
+  if (!containsHebrew(trimmed)) {
+    return { englishName: trimmed, gender: "female" };
+  }
+
+  const model = process.env.ANTHROPIC_TRANSLATE_MODEL || "claude-haiku-4-5-20251001";
+  const system =
+    "You analyze a person's name and return ONLY a JSON object of the form " +
+    '{"englishName":"...","gender":"male"|"female"} with no surrounding text, ' +
+    "no markdown, no explanation.\n\n" +
+    "CRITICAL: Treat the ENTIRE input as a proper name — a single identifier. " +
+    "Never translate meaning. Transliterate the SOUND, not the WORD. " +
+    "This holds even when the name happens to be spelled the same as a common " +
+    "Hebrew word. The person picked that spelling as their name; preserve it.\n\n" +
+    "Rules:\n" +
+    "1. englishName: if the input is in Hebrew, PHONETICALLY transliterate to English.\n" +
+    "   Examples (correct → wrong):\n" +
+    "   • 'יובל כץ' → 'Yuval Katz' (NOT 'Yield Edge')\n" +
+    "   • 'אגוז' → 'Egoz' (NOT 'Nut')\n" +
+    "   • 'שחר' → 'Shahar' (NOT 'Dawn')\n" +
+    "   • 'ברק' → 'Barak' (NOT 'Lightning')\n" +
+    "   • 'אור' → 'Or' (NOT 'Light')\n" +
+    "   Use standard modern Israeli Hebrew romanization. If the input is already " +
+    "in Latin script, pass it through unchanged (preserve original spelling/capitalization).\n" +
+    "2. gender: MUST be exactly 'male' or 'female'. Never 'unknown' or anything else. " +
+    "If the first name is truly ambiguous (unisex), pick your best statistical guess. " +
+    "Israeli context: if the name suggests Israeli-Hebrew origin, weight by common " +
+    "Israeli gender usage (e.g., 'יובל' is unisex but slightly more common as male).";
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 200,
+        system,
+        messages: [{ role: "user", content: trimmed }],
+      }),
+    });
+    if (!res.ok) throw new Error(`anthropic HTTP ${res.status}`);
+    const data: any = await res.json();
+    const text = (data?.content ?? [])
+      .filter((b: any) => b?.type === "text")
+      .map((b: any) => b.text)
+      .join("")
+      .trim();
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error(`no JSON in response: ${text.slice(0, 100)}`);
+    const parsed: any = JSON.parse(match[0]);
+    const englishName =
+      typeof parsed.englishName === "string" && parsed.englishName.trim()
+        ? parsed.englishName.trim()
+        : trimmed;
+    const gender = parsed.gender === "male" ? "male" : "female";
+    return { englishName, gender };
+  } catch {
+    return { englishName: trimmed, gender: "female" };
+  }
+}
+
 async function createContactAndLead(args: {
   name: string;
   phone: string;
   sourceIndex: number;
+  genderIndex?: number;
 }): Promise<{ contactId: string; leadId: string }> {
   // Create Contact
   const contactCv: Record<string, unknown> = {
     [CONTACT_PHONE_COL]: { phone: args.phone, countryShortName: "IL" },
     [CONTACT_TYPE_COL]: { index: CONTACT_TYPE_LEAD },
   };
+  if (args.genderIndex != null) {
+    contactCv[CONTACT_GENDER_COL] = { index: args.genderIndex };
+  }
   const cdata = await gql<any>(
     `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
       create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
@@ -299,24 +396,33 @@ async function handleCreate(payload: any): Promise<NetlifyResponse> {
     });
   }
 
-  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+  const rawName = [firstName, lastName].filter(Boolean).join(" ").trim();
+
+  // Hebrew → English transliteration + gender detection via Claude Haiku.
+  // Monday convention: names in CRM are always English. analyzeName falls
+  // back to the raw input + female on API failure, so worst case is a
+  // Hebrew-named Contact that crm-cleanup re-syncs overnight.
+  const { englishName, gender } = await analyzeName(rawName);
 
   // Source attribution from the prefilled wa.me marker (see header comment).
   const lastInput = String(payload?.last_input ?? "").trim().toLowerCase();
   const cameFromWebsite = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX);
   const sourceIndex = cameFromWebsite ? LEAD_SOURCE_WEBSITE : LEAD_SOURCE_MANYCHAT;
+  const genderIndex = gender === "male" ? CONTACT_GENDER_MALE : CONTACT_GENDER_FEMALE;
 
   const { contactId, leadId } = await createContactAndLead({
-    name: fullName,
+    name: englishName,
     phone,
     sourceIndex,
+    genderIndex,
   });
 
   return json(200, {
     contact_id: contactId,
     lead_id: leadId,
-    name: fullName,
+    name: englishName,
     source: cameFromWebsite ? "Website" : "Manychat",
+    gender,
   });
 }
 
