@@ -371,12 +371,21 @@ async function handleGreet(payload: any): Promise<NetlifyResponse> {
 
 // ─── Action: create ───────────────────────────────────────────────────────
 // Called by ManyChat AFTER it's collected the user's name in the flow.
-// Creates a real Contact + Lead with that name. Skips creation if the
-// contact already exists (race-safety: ManyChat could in theory call this
-// after another path already created the Contact).
+// Forwards to the canonical `lead-intake` Trigger.dev task, which handles:
+//   - Hebrew → English name transliteration (via Claude Haiku)
+//   - Contact upsert with 3-tier dedup (phone, email, fuzzy phone)
+//   - upsertLead: 1 Contact = 1 Lead, with re-engagement updates in place
+//   - Meta CAPI Lead event firing
+//   - ManyChat subscriber upsert
+//   - Audit notes on the Lead
+//
+// Source detection: if the user's first message starts with "Hi De Club!"
+// (the prefilled text on every wa.me link on declub.co.il), we tag the
+// Lead as Source=Website. Otherwise Source=Manychat (channel of contact).
 //
 // Body: { phone, first_name, last_name?, last_input? }
-// Returns: { contact_id, lead_id, name, source }
+// Returns: { ok: true, queued: true, source } — no contact_id (async). If
+// ManyChat needs the contact_id, call action=greet on the next interaction.
 async function handleCreate(payload: any): Promise<NetlifyResponse> {
   const phone = String(payload?.phone ?? "").trim();
   const firstName = String(payload?.first_name ?? "").trim();
@@ -385,45 +394,54 @@ async function handleCreate(payload: any): Promise<NetlifyResponse> {
   if (!phone) return json(400, { error: "missing phone" });
   if (!firstName) return json(400, { error: "missing first_name" });
 
-  // Race safety: re-lookup. If a Contact appeared between greet and create
-  // (e.g. parallel flow, user double-tapped, etc.), just return the
-  // existing record instead of creating a duplicate.
-  const existing = await lookupContactByPhone(phone);
-  if (existing) {
-    return json(200, {
-      contact_id: existing.contactId,
-      name: existing.name,
-      already_existed: true,
-    });
-  }
-
-  const rawName = [firstName, lastName].filter(Boolean).join(" ").trim();
-
-  // Hebrew → English transliteration + gender detection via Claude Haiku.
-  // Monday convention: names in CRM are always English. analyzeName falls
-  // back to the raw input + female on API failure, so worst case is a
-  // Hebrew-named Contact that crm-cleanup re-syncs overnight.
-  const { englishName, gender } = await analyzeName(rawName);
+  const triggerKey = process.env.TRIGGER_PROD_SECRET_KEY;
+  if (!triggerKey) return json(500, { error: "TRIGGER_PROD_SECRET_KEY missing" });
 
   // Source attribution from the prefilled wa.me marker (see header comment).
   const lastInput = String(payload?.last_input ?? "").trim().toLowerCase();
   const cameFromWebsite = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX);
-  const sourceIndex = cameFromWebsite ? LEAD_SOURCE_WEBSITE : LEAD_SOURCE_MANYCHAT;
-  const genderIndex = gender === "male" ? CONTACT_GENDER_MALE : CONTACT_GENDER_FEMALE;
 
-  const { contactId, leadId } = await createContactAndLead({
-    name: englishName,
-    phone,
-    sourceIndex,
-    genderIndex,
-  });
+  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
 
+  // Forward to Trigger.dev lead-intake. Fire-and-wait: we wait for the
+  // task to be queued (HTTP 200 from Trigger.dev) but NOT for the run to
+  // complete (Trigger.dev's trigger API is async by design).
+  const res = await fetch(
+    "https://api.trigger.dev/api/v1/tasks/lead-intake/trigger",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${triggerKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        payload: {
+          name: fullName,
+          phone,
+          source_override: cameFromWebsite ? "Website" : "Manychat",
+          type_override: "Organic",
+          source: "manychat-wa-inbound",
+          notes: lastInput ? `Initial WA message: "${lastInput.slice(0, 500)}"` : undefined,
+        },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    return json(502, {
+      error: "trigger.dev rejected",
+      status: res.status,
+      detail: text.slice(0, 500),
+    });
+  }
+
+  const data = (await res.json()) as { id?: string };
   return json(200, {
-    contact_id: contactId,
-    lead_id: leadId,
-    name: englishName,
+    ok: true,
+    queued: true,
+    run_id: data.id ?? null,
     source: cameFromWebsite ? "Website" : "Manychat",
-    gender,
   });
 }
 
