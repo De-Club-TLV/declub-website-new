@@ -1191,6 +1191,15 @@ em {
     justify-content: center;
 }
 
+.debox-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 20px;
+    border: 1px solid rgba(209, 220, 189, 0.15);
+    display: block;
+}
+
 .debox-placeholder-text {
     font-family: var(--font-body);
     font-size: clamp(2rem, 4vw, 3.5rem);
