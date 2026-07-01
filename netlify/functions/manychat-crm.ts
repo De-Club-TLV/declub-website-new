@@ -743,6 +743,9 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
   }
 
   const action = String(payload?.action ?? "").trim();
+  console.log(
+    `manychat-crm request action=${action} phone=${String(payload?.phone ?? "")} sub=${String(payload?.subscriber_id ?? "")}`
+  );
   try {
     if (action === "capture") return await handleCapture(payload);
     if (action === "greet") return await handleGreet(payload);
