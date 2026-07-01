@@ -59,8 +59,20 @@ const LEAD_TYPE_COL = "color_mkwbcm0n";
 const LEAD_DATE_COL = "date_mkwg62xr";
 const LEAD_CONTACT_RELATION_COL = "board_relation_mkwaq2js";
 const CONTACT_LEAD_RELATION_COL = "board_relation_mkzy8749";
+const CONTACT_MANYCHAT_ID_COL = "text_mkwcgpxt";
+const CONTACT_MANYCHAT_LINK_COL = "link_mkwff7hj";
+const LEADS_FOLLOWUP_GROUP_ID = "group_mkwb2j5j";
 
 const CONTACT_GENDER_COL = "color_mkwcfe01";
+
+// ManyChat page id — used to build the live-chat URL stored on the Contact's
+// ManyChat Link column (https://app.manychat.com/fb<page>/chat/<subscriber>).
+const MANYCHAT_PAGE_ID = process.env.MANYCHAT_PAGE_ID ?? "";
+function buildLiveChatUrl(subscriberId: string): string {
+  return MANYCHAT_PAGE_ID
+    ? `https://app.manychat.com/fb${MANYCHAT_PAGE_ID}/chat/${subscriberId}`
+    : "";
+}
 
 // Monday label indices (LEAD_SOURCE / LEAD_TYPE / etc — mirror of
 // General/src/shared/monday.ts).
@@ -391,6 +403,175 @@ async function stampPhoneLookup(subscriberId: string, phone: string): Promise<vo
   }
 }
 
+// Fold fancy unicode / emoji out of a WhatsApp/IG display name (mirror of
+// General shared/translate.ts::cleanName). Keeps letters (incl Hebrew), space,
+// apostrophe, hyphen. The nightly crm-cleanup transliterates Hebrew → English.
+function cleanNameInline(raw: string): string {
+  return raw
+    .normalize("NFKD")
+    .replace(/[^\p{L}\s'-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Read a Contact's current ManyChat id + link so we only set what's missing.
+async function getContactManychatFields(
+  contactId: string
+): Promise<{ id: string | null; link: string | null }> {
+  const data = await gql<any>(
+    `query ($id: ID!, $cols: [String!]) {
+      items(ids: [$id]) { column_values(ids: $cols) { id text } }
+    }`,
+    { id: contactId, cols: [CONTACT_MANYCHAT_ID_COL, CONTACT_MANYCHAT_LINK_COL] }
+  );
+  const cols: any[] = data?.items?.[0]?.column_values ?? [];
+  const idCol = cols.find((c) => c.id === CONTACT_MANYCHAT_ID_COL);
+  const linkCol = cols.find((c) => c.id === CONTACT_MANYCHAT_LINK_COL);
+  return {
+    id: idCol?.text?.trim() || null,
+    link: linkCol?.text?.trim() || null,
+  };
+}
+
+// Ensure an existing Contact carries its ManyChat id + link — set only when
+// missing, never clobber. Used for contacts already in the CRM.
+async function ensureContactManychat(
+  contactId: string,
+  subscriberId: string
+): Promise<void> {
+  if (!subscriberId) return;
+  const cur = await getContactManychatFields(contactId);
+  const cv: Record<string, unknown> = {};
+  if (!cur.id) cv[CONTACT_MANYCHAT_ID_COL] = subscriberId;
+  if (!cur.link) {
+    const url = buildLiveChatUrl(subscriberId);
+    if (url) cv[CONTACT_MANYCHAT_LINK_COL] = { url, text: url };
+  }
+  if (Object.keys(cv).length === 0) return;
+  await gql<any>(
+    `mutation ($boardId: ID!, $itemId: ID!, $cv: JSON!) {
+      change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $cv) { id }
+    }`,
+    { boardId: CONTACTS_BOARD_ID, itemId: contactId, cv: JSON.stringify(cv) }
+  );
+}
+
+// Create a Contact + Lead for a cold WhatsApp inbound — given name + phone,
+// lead status Follow Up, ManyChat id + link on the Contact. Uses label-based
+// status/type values (unambiguous vs index). Returns the new ids.
+async function createCaptureLead(args: {
+  name: string;
+  phone: string;
+  sourceLabel: string;
+  subscriberId: string;
+}): Promise<{ contactId: string; leadId: string }> {
+  const contactCv: Record<string, unknown> = {
+    [CONTACT_PHONE_COL]: { phone: args.phone, countryShortName: "IL" },
+    [CONTACT_TYPE_COL]: { label: "Lead" },
+  };
+  if (args.subscriberId) {
+    contactCv[CONTACT_MANYCHAT_ID_COL] = args.subscriberId;
+    const url = buildLiveChatUrl(args.subscriberId);
+    if (url) contactCv[CONTACT_MANYCHAT_LINK_COL] = { url, text: url };
+  }
+  const cdata = await gql<any>(
+    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
+      create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
+    }`,
+    {
+      boardId: CONTACTS_BOARD_ID,
+      groupId: CONTACTS_LEADS_GROUP_ID,
+      name: args.name,
+      cv: JSON.stringify(contactCv),
+    }
+  );
+  const contactId: string = cdata.create_item.id;
+
+  const now = new Date();
+  const leadCv: Record<string, unknown> = {
+    [LEAD_STATUS_COL]: { label: "Follow Up" },
+    [LEAD_SOURCE_COL]: { label: args.sourceLabel },
+    [LEAD_TYPE_COL]: { label: "Organic" },
+    [LEAD_DATE_COL]: { date: now.toISOString().slice(0, 10), time: now.toISOString().slice(11, 19) },
+  };
+  const ldata = await gql<any>(
+    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
+      create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
+    }`,
+    {
+      boardId: LEADS_BOARD_ID,
+      groupId: LEADS_FOLLOWUP_GROUP_ID,
+      name: args.name,
+      cv: JSON.stringify(leadCv),
+    }
+  );
+  const leadId: string = ldata.create_item.id;
+
+  await gql<any>(
+    `mutation ($leadId: ID!, $boardId: ID!, $col: String!, $val: JSON!) {
+      change_column_value(item_id: $leadId, board_id: $boardId, column_id: $col, value: $val) { id }
+    }`,
+    {
+      leadId,
+      boardId: LEADS_BOARD_ID,
+      col: LEAD_CONTACT_RELATION_COL,
+      val: JSON.stringify({ item_ids: [parseInt(contactId, 10)] }),
+    }
+  );
+
+  return { contactId, leadId };
+}
+
+// ─── Action: capture ──────────────────────────────────────────────────────
+// Fires on the FIRST WhatsApp message from a contact, whatever the text.
+// - Already in CRM: do nothing except ensure the ManyChat id + link are set.
+// - New: create Contact + Lead with the WhatsApp given name + phone, status
+//   Follow Up. Always returns contact_id so the flow can later call
+//   update_name once it has collected the person's real name.
+//
+// Body: { phone, first_name?, last_name?, subscriber_id?, last_input? }
+// Returns: { exists: bool, contact_id, lead_id? }
+async function handleCapture(payload: any): Promise<NetlifyResponse> {
+  const phone = String(payload?.phone ?? "").trim();
+  if (!phone) return json(400, { error: "missing phone" });
+  const subscriberId = String(payload?.subscriber_id ?? "").trim();
+  const firstName = String(payload?.first_name ?? "").trim();
+  const lastName = String(payload?.last_name ?? "").trim();
+  const lastInput = String(payload?.last_input ?? "").trim().toLowerCase();
+
+  // Make the subscriber findable by phone forever (best-effort, non-fatal).
+  if (subscriberId) {
+    try {
+      await stampPhoneLookup(subscriberId, phone);
+    } catch (err) {
+      console.error("capture stampPhoneLookup failed (non-fatal):", (err as Error).message);
+    }
+  }
+
+  const existing = await lookupContactByPhone(phone);
+  if (existing) {
+    // Already in the CRM — leave the lead/status alone; only backfill ManyChat.
+    try {
+      await ensureContactManychat(existing.contactId, subscriberId);
+    } catch (err) {
+      console.error("ensureContactManychat failed (non-fatal):", (err as Error).message);
+    }
+    return json(200, { exists: true, contact_id: existing.contactId });
+  }
+
+  // New contact — create immediately with the WhatsApp given name.
+  const givenName =
+    cleanNameInline([firstName, lastName].filter(Boolean).join(" ")) || "WhatsApp Lead";
+  const sourceLabel = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX) ? "Website" : "Manychat";
+  const { contactId, leadId } = await createCaptureLead({
+    name: givenName,
+    phone,
+    sourceLabel,
+    subscriberId,
+  });
+  return json(200, { exists: false, contact_id: contactId, lead_id: leadId });
+}
+
 // ─── Action: greet ────────────────────────────────────────────────────────
 // Lookup-only. NO writes to Monday. ManyChat's flow branches on whether
 // `contact_id` is set in the response.
@@ -563,10 +744,11 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
 
   const action = String(payload?.action ?? "").trim();
   try {
+    if (action === "capture") return await handleCapture(payload);
     if (action === "greet") return await handleGreet(payload);
     if (action === "create") return await handleCreate(payload);
     if (action === "update_name") return await handleUpdateName(payload);
-    return json(400, { error: `unknown action '${action}', expected 'greet', 'create', or 'update_name'` });
+    return json(400, { error: `unknown action '${action}', expected 'capture', 'greet', 'create', or 'update_name'` });
   } catch (err) {
     return json(500, { error: (err as Error).message });
   }
