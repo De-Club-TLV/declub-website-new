@@ -61,6 +61,7 @@ const LEAD_CONTACT_RELATION_COL = "board_relation_mkwaq2js";
 const CONTACT_LEAD_RELATION_COL = "board_relation_mkzy8749";
 const CONTACT_MANYCHAT_ID_COL = "text_mkwcgpxt";
 const CONTACT_MANYCHAT_LINK_COL = "link_mkwff7hj";
+const CONTACT_OPT_IN_COL = "boolean_mkwe3v1b";
 const LEADS_FOLLOWUP_GROUP_ID = "group_mkwb2j5j";
 
 const CONTACT_GENDER_COL = "color_mkwcfe01";
@@ -72,6 +73,19 @@ function buildLiveChatUrl(subscriberId: string): string {
   return MANYCHAT_PAGE_ID
     ? `https://app.manychat.com/fb${MANYCHAT_PAGE_ID}/chat/${subscriberId}`
     : "";
+}
+
+// Value for the Contact's ManyChat Link column: the URL points at the live
+// chat, but the display TEXT reads `manychat.com/<first_name>` (falls back to
+// the URL when no first name). Returns null when there's no page id.
+function manychatLinkValue(
+  subscriberId: string,
+  firstName: string
+): { url: string; text: string } | null {
+  const url = buildLiveChatUrl(subscriberId);
+  if (!url) return null;
+  const fn = (firstName || "").trim().toLowerCase();
+  return { url, text: fn ? `manychat.com/${fn}` : url };
 }
 
 // Monday label indices (LEAD_SOURCE / LEAD_TYPE / etc — mirror of
@@ -437,15 +451,16 @@ async function getContactManychatFields(
 // missing, never clobber. Used for contacts already in the CRM.
 async function ensureContactManychat(
   contactId: string,
-  subscriberId: string
+  subscriberId: string,
+  firstName: string
 ): Promise<void> {
   if (!subscriberId) return;
   const cur = await getContactManychatFields(contactId);
   const cv: Record<string, unknown> = {};
   if (!cur.id) cv[CONTACT_MANYCHAT_ID_COL] = subscriberId;
   if (!cur.link) {
-    const url = buildLiveChatUrl(subscriberId);
-    if (url) cv[CONTACT_MANYCHAT_LINK_COL] = { url, text: url };
+    const link = manychatLinkValue(subscriberId, firstName);
+    if (link) cv[CONTACT_MANYCHAT_LINK_COL] = link;
   }
   if (Object.keys(cv).length === 0) return;
   await gql<any>(
@@ -461,6 +476,7 @@ async function ensureContactManychat(
 // status/type values (unambiguous vs index). Returns the new ids.
 async function createCaptureLead(args: {
   name: string;
+  firstName: string;
   phone: string;
   sourceLabel: string;
   subscriberId: string;
@@ -468,11 +484,13 @@ async function createCaptureLead(args: {
   const contactCv: Record<string, unknown> = {
     [CONTACT_PHONE_COL]: { phone: args.phone, countryShortName: "IL" },
     [CONTACT_TYPE_COL]: { label: "Lead" },
+    // Messaging the business on WhatsApp is an opt-in — check the box.
+    [CONTACT_OPT_IN_COL]: { checked: "true" },
   };
   if (args.subscriberId) {
     contactCv[CONTACT_MANYCHAT_ID_COL] = args.subscriberId;
-    const url = buildLiveChatUrl(args.subscriberId);
-    if (url) contactCv[CONTACT_MANYCHAT_LINK_COL] = { url, text: url };
+    const link = manychatLinkValue(args.subscriberId, args.firstName);
+    if (link) contactCv[CONTACT_MANYCHAT_LINK_COL] = link;
   }
   const cdata = await gql<any>(
     `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
@@ -552,7 +570,7 @@ async function handleCapture(payload: any): Promise<NetlifyResponse> {
   if (existing) {
     // Already in the CRM — leave the lead/status alone; only backfill ManyChat.
     try {
-      await ensureContactManychat(existing.contactId, subscriberId);
+      await ensureContactManychat(existing.contactId, subscriberId, firstName);
     } catch (err) {
       console.error("ensureContactManychat failed (non-fatal):", (err as Error).message);
     }
@@ -565,6 +583,7 @@ async function handleCapture(payload: any): Promise<NetlifyResponse> {
   const sourceLabel = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX) ? "Website" : "Manychat";
   const { contactId, leadId } = await createCaptureLead({
     name: givenName,
+    firstName,
     phone,
     sourceLabel,
     subscriberId,
