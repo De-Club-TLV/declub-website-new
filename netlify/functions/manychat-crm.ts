@@ -32,6 +32,17 @@ import { timingSafeEqual } from "node:crypto";
 // in Netlify env. Same model as the website lead-intake path.
 
 const MONDAY_API = "https://api.monday.com/v2";
+const MANYCHAT_API = "https://api.manychat.com/fb";
+
+// The custom field our whole system searches by (findByCustomField). ManyChat
+// auto-creates a subscriber the moment someone WhatsApps the business but never
+// sets this field, so an inbound-only sub is invisible to phone lookups — a
+// later Hot Form / Arbox lead can't be linked (the 2026-07-01 "Shir Etan"
+// case). We stamp it here on every conversation-start so every subscriber is
+// findable by phone forever. Default mirrors MANYCHAT_FIELD_PHONE_LOOKUP.
+const PHONE_LOOKUP_FIELD_ID = Number(
+  process.env.MANYCHAT_FIELD_PHONE_LOOKUP ?? "14505849"
+);
 
 // De Club CRM board + column IDs (mirror of General/src/shared/config.ts).
 // Hardcoded because Netlify Functions can't import from the General/ repo.
@@ -341,6 +352,45 @@ async function renameItem(itemId: string, boardId: string, newName: string): Pro
   );
 }
 
+// Mirror of General/src/shared/phone.ts::toWhatsappId (normalizePhone → digits
+// only). MUST produce the exact same value our code searches with, or the
+// stamped phone_lookup won't match findByCustomField.
+function toWhatsappId(phone: string): string {
+  const cleaned = phone.replace(/[^\d+]/g, "");
+  let norm: string;
+  if (cleaned.startsWith("+")) norm = cleaned.slice(1);
+  else if (cleaned.startsWith("0") && cleaned.length === 10) norm = "972" + cleaned.slice(1);
+  else if (cleaned.startsWith("972")) norm = cleaned;
+  else if (cleaned.startsWith("5") && cleaned.length === 9) norm = "972" + cleaned;
+  else norm = cleaned;
+  return norm.replace(/\D/g, "");
+}
+
+// Stamp the phone_lookup custom field on the ManyChat subscriber so our system
+// can always resolve them by phone. Non-fatal: never block the greet branch.
+async function stampPhoneLookup(subscriberId: string, phone: string): Promise<void> {
+  const token = process.env.MANYCHAT_API_TOKEN;
+  if (!token || !subscriberId) return;
+  const waId = toWhatsappId(phone);
+  if (!waId) return;
+  const res = await fetch(`${MANYCHAT_API}/subscriber/setCustomFields`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      subscriber_id: subscriberId,
+      fields: [{ field_id: PHONE_LOOKUP_FIELD_ID, field_value: waId }],
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(
+      `manychat setCustomFields HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`
+    );
+  }
+}
+
 // ─── Action: greet ────────────────────────────────────────────────────────
 // Lookup-only. NO writes to Monday. ManyChat's flow branches on whether
 // `contact_id` is set in the response.
@@ -357,6 +407,19 @@ async function renameItem(itemId: string, boardId: string, newName: string): Pro
 async function handleGreet(payload: any): Promise<NetlifyResponse> {
   const phone = String(payload?.phone ?? "").trim();
   if (!phone) return json(400, { error: "missing phone" });
+
+  // Stamp phone_lookup on this subscriber (ManyChat never sets it on its own
+  // auto-created WhatsApp subs). Runs on every conversation-start, so every
+  // subscriber becomes findable by phone — closes the "exists but unresolvable"
+  // gap. Non-fatal: a failure here must not break the greet branch.
+  const subscriberId = String(payload?.subscriber_id ?? "").trim();
+  if (subscriberId) {
+    try {
+      await stampPhoneLookup(subscriberId, phone);
+    } catch (err) {
+      console.error("stampPhoneLookup failed (non-fatal):", (err as Error).message);
+    }
+  }
 
   const existing = await lookupContactByPhone(phone);
   if (existing) {
