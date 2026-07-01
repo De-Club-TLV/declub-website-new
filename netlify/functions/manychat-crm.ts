@@ -750,6 +750,11 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
     if (action === "update_name") return await handleUpdateName(payload);
     return json(400, { error: `unknown action '${action}', expected 'capture', 'greet', 'create', or 'update_name'` });
   } catch (err) {
+    console.error(
+      `manychat-crm action=${action} error:`,
+      (err as Error).message,
+      (err as Error).stack
+    );
     return json(500, { error: (err as Error).message });
   }
 }
