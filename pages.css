@@ -12,6 +12,12 @@
     overflow: hidden;
 }
 
+/* Full-viewport hero variant (corporate page) */
+.floor-hero.floor-hero--full {
+    height: 100vh;
+    height: 100svh;
+}
+
 .floor-hero-bg {
     position: absolute;
     inset: 0;
