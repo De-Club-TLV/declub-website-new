@@ -1,9 +1,43 @@
 # Session Log
 
 ## Spend to date
-- Sessions: 3
-- Tokens (in / out / cache-read): 874 / 238,008 / 40,859,523
-- Cost: $117.6592
+- Sessions: 4
+- Tokens (in / out / cache-read): 123,992 / 791,606 / 234,127,642
+- Cost: $199.5800
+
+---
+
+## 2026-07-06
+
+**Focus:** Corporate Experiences (B2B) page end-to-end: page build, B2B Deals pipeline, alert emails, plus a batch of site-wide updates.
+
+**Done:**
+- Built and shipped `corporate.html` (PR #6): full B2B landing from Dana's copy, 16 optimized pro-shoot photos, extended contact modal (company / team size / event type), full-viewport hero. Live on declub.co.il/corporate.html
+- B2B lead pipeline: new `submit-corporate-lead` Netlify function → Trigger.dev `corporate-lead` task → item on the B2B Deals Monday board (5022104617, De Club account) with stage New + labeled columns. Consumer lead-intake untouched. E2E-tested in prod, test records deleted
+- New-inquiry alert email (brand-book design: Figtree/Plex Mono, White/Black/Stone/Celadon) from info@declub.co.il to Rachel/Yoni/Yuval on every corporate submission; sample approved, deployed (v20260706.16)
+- Site-wide: Teachers Course nav+footer link with NEW badge → yoga-course.declub.co.il; ECHO.svg icon replacing ♪ placeholders; footer © 2026 De Club TLV LTD; removed "first workout on us" line; hero title on 3 lines
+- Homepage floor cards: hover photo reveal per floor; floor pages got real photos (VUCA ring, ART studio, LIVO sauna, ECHO first-ever hero image)
+- Community page synced with Supabase teachers DB: +10 teachers with profile photos (placeholder bios — flagged), Emanuella Greenberg later removed on request
+- Fixed pre-existing live bug: join-CTA buttons invisible site-wide (stacked gsap.from tweens; now fromTo). Was killing the bottom CTA on every floor page
+- Shay Reem June 2026 payroll: computed via production pipeline (31 LIVO sessions, net ₪2,760 / gross ₪3,256.80, 3 Private Events excluded), emailed to Shay CC Yuval+Maru in the De Club | Finance format
+
+**Decisions:**
+- B2B leads bypass the consumer CRM/ManyChat/Meta-CAPI entirely (companies get human follow-up); phase 1 briefly used source_override=Events until the dedicated board landed same-day
+- Deploy previews intentionally can't submit leads (different HMAC secret per Netlify context) — testing happens on prod after merge
+- WhatsApp CTAs removed from corporate page per Yuval: form is the only contact path there
+
+**Monday:**
+- Closed: none (today's work wasn't board-tracked)
+- Created: Get LIVO/sauna photos from photographer (Yuval) · Collect real bios for 10 new community teachers (Yuval)
+
+**Next:**
+- Corporate phase 2 ideas when needed: event-date field on form + board date column, Hebrew alert email variant
+- Swap LIVO hover/highlight photos when real sauna shots arrive; swap community bios when real ones arrive
+- Carryovers: OG meta sweep de-club.netlify.app → declub.co.il (corporate.html already correct, 9 old pages pending); trial-class purchase option (Monday #2737401971); self-host hero video; analytics pixel decision
+- n8n MCP connections (both instances) went NO_RESPONSE this session while instances were healthy — restart/reconnect the MCPs
+- Netlify webhook missed one push today (needed empty-commit retrigger) — if it recurs, check the GitHub webhook config
+
+**Spend:** $81.9208 this session · tokens in/out/cache-read: 123,118 / 553,598 / 193,268,119
 
 ---
 
