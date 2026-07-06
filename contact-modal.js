@@ -110,6 +110,21 @@
         fbp: getCookie('_fbp'),
         fbc: getCookie('_fbc'),
       };
+
+      // B2B variant (corporate.html): extra fields ride inside `notes`
+      // because lead-intake's schema strips unknown top-level keys.
+      // source_override routes the lead to the Events source in Monday.
+      var company = data.get('company');
+      var teamSize = data.get('team_size');
+      var eventType = data.get('event_type');
+      if (company || teamSize || eventType) {
+        payload.notes =
+          'B2B event inquiry' +
+          (company ? ' | Company: ' + company : '') +
+          (teamSize ? ' | Team size: ' + teamSize : '') +
+          (eventType ? ' | Event type: ' + eventType : '');
+        payload.source_override = 'Events';
+      }
       // Canonical JSON — keys sorted alphabetically — so the HMAC we compute
       // here matches what n8n reproduces after its JSON-parse step.
       var body = JSON.stringify(payload, Object.keys(payload).sort());

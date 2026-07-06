@@ -162,12 +162,19 @@ document.querySelectorAll('.accordion-item').forEach((item, i) => {
 });
 
 // Bottom CTA
+// fromTo with explicit end values: the .section-tag inside .join-content is
+// also targeted by the .section-tag tween above, and stacked gsap.from()
+// tweens capture each other's 0-opacity as the destination, leaving the tag
+// and CTA buttons permanently invisible.
 const joinContent = document.querySelector('.join .join-content');
 if (joinContent) {
-    gsap.from(joinContent.children, {
-        scrollTrigger: { trigger: '.join', start: 'top 90%' },
-        opacity: 0, y: 25, duration: 0.6, stagger: 0.06
-    });
+    gsap.fromTo(joinContent.children,
+        { opacity: 0, y: 25 },
+        {
+            scrollTrigger: { trigger: '.join', start: 'top 90%' },
+            opacity: 1, y: 0, duration: 0.6, stagger: 0.06
+        }
+    );
 }
 
 // Next floor
