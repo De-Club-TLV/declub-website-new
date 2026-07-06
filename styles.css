@@ -185,6 +185,30 @@ em {
     width: 100%;
 }
 
+/* "New" badge on nav / menu links */
+.nav-badge {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 3px 7px 2px;
+    background: var(--color-sage);
+    color: #000000;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 100px;
+    vertical-align: middle;
+    transform: translateY(-2px);
+}
+
+.nav-badge--menu {
+    font-size: 0.85rem;
+    padding: 5px 12px 4px;
+    margin-left: 14px;
+    transform: translateY(-6px);
+}
+
 .nav-link--cta {
     color: var(--color-bg);
     background: var(--color-sage);
