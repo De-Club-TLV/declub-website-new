@@ -1077,11 +1077,51 @@ em {
     border-radius: 16px;
     padding: 36px;
     transition: border-color 0.4s, transform 0.4s var(--ease-out);
+    position: relative;
+    overflow: hidden;
 }
 
 .floor-card:hover {
     border-color: rgba(177, 166, 150, 0.25);
     transform: translateY(-4px);
+}
+
+/* Hover photo reveal */
+.floor-card-photo {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 0.5s var(--ease-out), transform 0.9s var(--ease-out);
+    pointer-events: none;
+}
+
+.floor-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.floor-card-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(10, 10, 8, 0.55) 0%,
+        rgba(10, 10, 8, 0.8) 60%,
+        rgba(10, 10, 8, 0.92) 100%
+    );
+}
+
+.floor-card:hover .floor-card-photo {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.floor-card > *:not(.floor-card-photo) {
+    position: relative;
+    z-index: 1;
 }
 
 .floor-card-header {
