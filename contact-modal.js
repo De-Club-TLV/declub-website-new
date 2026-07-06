@@ -15,6 +15,10 @@
   // + Netlify env + General/.env, then deploy.
   var WEBHOOK_SECRET = '458094bae8debf2fa2a6eed653fa8d55e67b943e11ec1581556e21b02ba386ec';
   var WEBHOOK_URL = '/.netlify/functions/submit-lead';
+  // B2B corporate inquiries (corporate.html) go to their own function →
+  // Trigger.dev corporate-lead → B2B Deals Monday board. Consumer leads
+  // keep flowing through submit-lead → lead-intake.
+  var WEBHOOK_URL_CORPORATE = '/.netlify/functions/submit-corporate-lead';
 
   var modal = document.getElementById('contactModal');
   if (!modal) return;
@@ -110,6 +114,20 @@
         fbp: getCookie('_fbp'),
         fbc: getCookie('_fbc'),
       };
+
+      // B2B variant (corporate.html): dedicated fields, dedicated endpoint.
+      var company = data.get('company');
+      var teamSize = data.get('team_size');
+      var eventType = data.get('event_type');
+      var isB2B = !!(company || teamSize || eventType);
+      if (isB2B) {
+        payload.company = company || '';
+        payload.team_size = teamSize || '';
+        payload.event_type = eventType || '';
+        delete payload.fbp;
+        delete payload.fbc;
+      }
+      var endpoint = isB2B ? WEBHOOK_URL_CORPORATE : WEBHOOK_URL;
       // Canonical JSON — keys sorted alphabetically — so the HMAC we compute
       // here matches what n8n reproduces after its JSON-parse step.
       var body = JSON.stringify(payload, Object.keys(payload).sort());
@@ -117,7 +135,7 @@
       try {
         var signature = await signHmacSha256(body, WEBHOOK_SECRET);
         // Fire-and-forget — user sees success instantly regardless.
-        fetch(WEBHOOK_URL, {
+        fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -128,7 +146,7 @@
       } catch (err) {
         // Fallback: post without signature if Web Crypto unavailable.
         // The function will drop it; user still sees success UI, we just miss the lead.
-        fetch(WEBHOOK_URL, {
+        fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: body,
