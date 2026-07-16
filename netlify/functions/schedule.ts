@@ -15,7 +15,10 @@ interface NetlifyResponse {
   body?: string;
 }
 
-const CACHE = "public, max-age=600, stale-while-revalidate=1800";
+// Short cache: the schedule only changes hourly, but a long TTL (or a long
+// stale-while-revalidate) risks serving a stale snapshot for many minutes,
+// which reads as "empty weeks" right after a sync. 2 minutes is plenty.
+const CACHE = "public, max-age=120";
 
 function json(statusCode: number, body: unknown, cache = false): NetlifyResponse {
   return {
