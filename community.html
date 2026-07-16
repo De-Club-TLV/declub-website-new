@@ -205,6 +205,88 @@
             transform: rotate(90deg);
         }
 
+        /* ===== Events Grid ===== */
+        .events-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+            padding: 0 20px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        .event-card {
+            position: relative;
+            display: block;
+            width: clamp(260px, 30vw, 360px);
+            aspect-ratio: 2 / 3;
+            border-radius: 20px;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        .event-image {
+            position: absolute;
+            inset: 0;
+            background-position: 50%;
+            background-size: cover;
+            border-radius: 20px;
+            transition: transform 0.5s ease;
+        }
+        .event-card:hover .event-image { transform: scale(1.03); }
+        .event-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            z-index: 1;
+            background-image: linear-gradient(#0000 30%, #000c 100%);
+            transition: background-image 0.4s ease;
+        }
+        .event-card:hover .event-overlay {
+            background-image: linear-gradient(#0004 10%, #000d 100%);
+        }
+        .event-content {
+            position: absolute;
+            inset: auto 0 0 0;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 24px 22px;
+        }
+        .event-date {
+            font-family: 'IBM Plex Mono', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--green);
+        }
+        .event-name {
+            font-family: Figtree, sans-serif;
+            font-size: 26px;
+            font-weight: 500;
+            line-height: 1.15;
+            color: var(--white);
+            text-transform: uppercase;
+        }
+        .event-host {
+            font-family: 'IBM Plex Mono', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #d8d4cc;
+        }
+        .event-cta {
+            font-family: 'IBM Plex Mono', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--white);
+            margin-top: 8px;
+            opacity: 0.85;
+            transition: color 0.3s, opacity 0.3s;
+        }
+        .event-card:hover .event-cta { color: var(--green); opacity: 1; }
+
         /* ===== CTA Banner ===== */
         .cta-banner {
             margin: clamp(50px, 7vw, 100px) 20px 0;
@@ -660,6 +742,35 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Section Header — Events -->
+    <div class="section-header">
+        <h2>Events at De Club</h2>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="events-grid">
+        <a href="https://nevo-peretz.declub.co.il/" target="_blank" rel="noopener" class="event-card">
+            <div class="event-image" style="background-image: url('assets/images/events/nevo-peretz.webp')"></div>
+            <div class="event-overlay"></div>
+            <div class="event-content">
+                <span class="event-date">29.7 · 11:00-15:00</span>
+                <div class="event-name">Performance Breathwork</div>
+                <span class="event-host">with Nevo Peretz</span>
+                <span class="event-cta">View Event &rarr;</span>
+            </div>
+        </a>
+        <a href="https://bloom.declub.co.il/" target="_blank" rel="noopener" class="event-card">
+            <div class="event-image" style="background-image: url('assets/images/events/bloom.webp')"></div>
+            <div class="event-overlay"></div>
+            <div class="event-content">
+                <span class="event-date">30.7 · 20:00</span>
+                <div class="event-name">Bloom</div>
+                <span class="event-host">Shibari &amp; poetry · PLSR Club at ECHO</span>
+                <span class="event-cta">View Event &rarr;</span>
+            </div>
+        </a>
     </div>
 
     <!-- Become a Member -->
