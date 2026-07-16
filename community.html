@@ -563,7 +563,7 @@
 
     <!-- Section Header — Events -->
     <div class="section-header">
-        <h2>Community Events</h2>
+        <h2>Upcoming Events</h2>
     </div>
 
     <!-- Events Grid -->
@@ -916,13 +916,21 @@
             });
         });
 
-        // Hero photo slideshow — crossfade every 4.5s
+        // Hero photo slideshow — random order per load, crossfade every 4.5s
         (function () {
             const slidesWrap = document.getElementById('heroSlides');
             if (!slidesWrap) return;
-            const slides = slidesWrap.querySelectorAll('.hero-slide');
+            const slides = Array.prototype.slice.call(slidesWrap.querySelectorAll('.hero-slide'));
             if (slides.length < 2) return;
+            // Fisher-Yates shuffle so the sequence differs every page load
+            for (let j = slides.length - 1; j > 0; j--) {
+                const k = Math.floor(Math.random() * (j + 1));
+                const tmp = slides[j]; slides[j] = slides[k]; slides[k] = tmp;
+            }
+            // Re-append in shuffled order; only the first is shown to start
+            slides.forEach(function (s) { s.classList.remove('active'); slidesWrap.appendChild(s); });
             let i = 0;
+            slides[0].classList.add('active');
             setInterval(function () {
                 slides[i].classList.remove('active');
                 i = (i + 1) % slides.length;
