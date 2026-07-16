@@ -152,7 +152,17 @@ em {
 .nav-links {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 36px;
+    /* Centered in the header: span the full nav width and center the items,
+       stay click-through so the full-width overlay never blocks the logo. */
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+}
+.nav-links > * {
+    pointer-events: auto;
 }
 
 .nav-link {
