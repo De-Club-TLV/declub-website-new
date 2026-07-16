@@ -55,6 +55,21 @@
     link.addEventListener('click', openModal);
   });
 
+  // International phone input (corporate.html only — the intl-tel-input
+  // library is loaded there). On other pages window.intlTelInput is
+  // undefined and the field stays a plain tel input, unchanged.
+  var iti = null;
+  var phoneInput = form ? form.querySelector('input[name="phone"]') : null;
+  if (phoneInput && window.intlTelInput) {
+    iti = window.intlTelInput(phoneInput, {
+      initialCountry: 'il',
+      separateDialCode: true,
+      loadUtils: function () {
+        return import('https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js');
+      },
+    });
+  }
+
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', function (e) {
     if (e.target === modal) closeModal();
@@ -99,10 +114,18 @@
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var data = new FormData(form);
+      // Full E.164 number when intl-tel-input + its utils are loaded;
+      // falls back to the raw field value otherwise.
+      var phoneValue = data.get('phone');
+      if (iti && typeof iti.getNumber === 'function') {
+        var fullNumber = iti.getNumber();
+        if (fullNumber) phoneValue = fullNumber;
+      }
       var payload = {
         name: data.get('name'),
-        phone: data.get('phone'),
+        phone: phoneValue,
         email: data.get('email'),
+        consent: data.get('consent') ? 'yes' : '',
         source: window.location.pathname,
         url: window.location.href,
         utm_source: qs('utm_source'),
@@ -124,6 +147,9 @@
         payload.company = company || '';
         payload.team_size = teamSize || '';
         payload.event_type = eventType || '';
+        if (iti && typeof iti.getSelectedCountryData === 'function') {
+          payload.phone_country = (iti.getSelectedCountryData().iso2 || '').toLowerCase();
+        }
         delete payload.fbp;
         delete payload.fbc;
       }

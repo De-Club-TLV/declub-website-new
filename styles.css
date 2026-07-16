@@ -1503,8 +1503,8 @@ em {
 .join-features {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    max-width: 480px;
+    gap: 16px 40px;
+    max-width: 600px;
     margin: 0 auto 48px;
     text-align: left;
 }
@@ -1547,7 +1547,7 @@ em {
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr;
     gap: 48px;
     margin-bottom: 64px;
 }
@@ -1827,3 +1827,108 @@ a.floor-card {
     .space-feature { grid-row: span 2; }
     .space-wide { grid-column: span 2; }
 }
+
+/* Footer — directions (Waze / Google Maps) */
+.footer-maps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+}
+.footer-maps a {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    transition: color 0.3s;
+}
+.footer-maps a:hover { color: var(--color-sage); }
+.footer-maps svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+/* Footer — social icons */
+.footer-socials {
+    display: flex;
+    gap: 16px;
+    margin-top: 22px;
+}
+.footer-socials a {
+    display: inline-flex;
+    color: var(--color-text-muted);
+    transition: color 0.3s, transform 0.2s;
+}
+.footer-socials a:hover {
+    color: var(--color-sage);
+    transform: translateY(-2px);
+}
+.footer-socials svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    display: block;
+}
+
+/* Contact modal — consent checkbox */
+.modal-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 6px 2px 2px;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+.modal-consent input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin: 1px 0 0;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s, border-color 0.2s;
+}
+.modal-consent input[type="checkbox"]:checked {
+    background: var(--color-sage);
+    border-color: var(--color-sage);
+}
+.modal-consent input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 9px;
+    border: solid var(--color-bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Corporate modal — international phone input (intl-tel-input, dark theme) */
+.modal-form .iti { width: 100%; display: block; }
+.modal-input--phone { padding-left: 14px; }
+.iti__selected-dial-code { color: var(--color-cream); font-family: var(--font-body); }
+.iti--separate-dial-code .iti__selected-country-primary { background: rgba(255, 255, 255, 0.04); }
+.iti__dropdown-content {
+    background: #1f1f1b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-cream);
+}
+.iti__search-input { background: #1f1f1b; color: var(--color-cream); }
+.iti__country.iti__highlight { background: rgba(209, 220, 189, 0.14); }
+.iti__country-name, .iti__dial-code { color: var(--color-text-muted); }
