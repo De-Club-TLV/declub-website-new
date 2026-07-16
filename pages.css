@@ -487,6 +487,8 @@
     padding: 40px 32px;
     text-align: center;
     position: relative;
+    display: flex;
+    flex-direction: column;
     transition: border-color 0.4s, transform 0.4s var(--ease-out);
 }
 
@@ -587,6 +589,7 @@
 .tier-card .btn {
     width: 100%;
     justify-content: center;
+    margin-top: auto;
 }
 
 /* FAQ */
