@@ -45,6 +45,24 @@
     }, 350);
   }
 
+  // GA4: fire a "book_trial_click" event when a trial CTA is clicked. GA4
+  // (G-PQBGX3M759) is loaded via GTM, which defines window.gtag, so we send the
+  // event directly — no GTM tag needed. Also mirrored to dataLayer for GTM.
+  function trackTrialClick() {
+    var params = {
+      link_url: 'https://arbox.link/7xhtp1Nv',
+      page_path: window.location.pathname,
+    };
+    try {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'book_trial_click', params);
+      } else {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(Object.assign({ event: 'book_trial_click' }, params));
+      }
+    } catch (e) {}
+  }
+
   // Wire every CTA that should open the modal. Exclude footer nav + WA links.
   document.querySelectorAll(
     'a[href*="join.html"], a.nav-link--cta, .btn--primary, .btn--ghost'
@@ -53,7 +71,10 @@
     var href = link.getAttribute('href') || '';
     if (href.indexOf('wa.me') !== -1) return;
     if (href.indexOf('whatsapp') !== -1) return;
-    if (href.indexOf('arbox.link') !== -1) return; // trial booking → Arbox, not the modal
+    if (href.indexOf('arbox.link') !== -1) {
+      link.addEventListener('click', trackTrialClick); // GA4 track, then navigate to Arbox
+      return;
+    }
     link.addEventListener('click', openModal);
   });
 
