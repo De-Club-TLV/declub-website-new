@@ -1511,9 +1511,10 @@ em {
 
 .join-feature {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     font-size: 0.95rem;
+    line-height: 1.5;
     font-weight: 400;
     color: var(--color-text);
 }
@@ -1521,6 +1522,10 @@ em {
 .join-feature-icon {
     color: var(--color-sage);
     font-size: 0.5rem;
+    /* Match the text's line box (0.95rem * 1.5) so the dot sits on the first
+       line, keeping wrapped and single-line items aligned. */
+    line-height: 1.425rem;
+    flex-shrink: 0;
 }
 
 .join-note {
