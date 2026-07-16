@@ -1919,6 +1919,26 @@ a.floor-card {
     transform: rotate(45deg);
 }
 
+/* Consent — invalid state + custom in-modal error message */
+.modal-consent--error input[type="checkbox"] {
+    border-color: #e2726e;
+    box-shadow: 0 0 0 3px rgba(226, 114, 110, 0.18);
+}
+
+.modal-consent--error {
+    color: #e6a3a0;
+}
+
+.modal-consent-error {
+    display: none;
+    margin: -6px 2px 2px;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #e2726e;
+}
+
 /* Corporate modal — international phone input (intl-tel-input, dark theme) */
 .modal-form .iti { width: 100%; display: block; }
 .modal-input--phone { padding-left: 14px; }

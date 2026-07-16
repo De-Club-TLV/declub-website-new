@@ -41,6 +41,7 @@
       if (formWrap) formWrap.style.display = '';
       if (success) success.classList.remove('show');
       if (form) form.reset();
+      clearConsentError();
     }, 350);
   }
 
@@ -67,6 +68,38 @@
       loadUtils: function () {
         return import('https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js');
       },
+    });
+  }
+
+  // Consent checkbox — custom in-modal error instead of the browser's
+  // native validation bubble (the checkbox carries no `required` attribute).
+  var consentInput = form ? form.querySelector('input[name="consent"]') : null;
+  var consentLabel = consentInput ? consentInput.closest('.modal-consent') : null;
+
+  function showConsentError() {
+    if (!consentLabel) return;
+    consentLabel.classList.add('modal-consent--error');
+    var err = form.querySelector('.modal-consent-error');
+    if (!err) {
+      err = document.createElement('p');
+      err.className = 'modal-consent-error';
+      err.setAttribute('role', 'alert');
+      err.textContent = 'Please confirm you agree to be contacted so we can reach out.';
+      consentLabel.insertAdjacentElement('afterend', err);
+    }
+    err.style.display = 'block';
+  }
+
+  function clearConsentError() {
+    if (!consentLabel) return;
+    consentLabel.classList.remove('modal-consent--error');
+    var err = form.querySelector('.modal-consent-error');
+    if (err) err.style.display = 'none';
+  }
+
+  if (consentInput) {
+    consentInput.addEventListener('change', function () {
+      if (consentInput.checked) clearConsentError();
     });
   }
 
@@ -113,6 +146,14 @@
   if (form) {
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+
+      // Mandatory consent — show the in-modal error and stop if unchecked.
+      if (consentInput && !consentInput.checked) {
+        showConsentError();
+        consentInput.focus();
+        return;
+      }
+
       var data = new FormData(form);
       // Full E.164 number when intl-tel-input + its utils are loaded;
       // falls back to the raw field value otherwise.
