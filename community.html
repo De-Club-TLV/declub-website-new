@@ -33,10 +33,10 @@
             padding: 0 20px;
         }
         .community-hero {
+            position: relative;
+            overflow: hidden;
             text-align: center;
-            background-image: url('assets/images/heroes/community-hero.webp');
-            background-position: 50%;
-            background-size: cover;
+            background: #0a0a08;
             border-radius: 60px;
             flex-flow: column;
             justify-content: center;
@@ -46,7 +46,31 @@
             min-height: 450px;
             display: flex;
         }
+        /* Crossfade photo slideshow */
+        .hero-slides {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            background-position: 50%;
+            background-size: cover;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            will-change: opacity;
+        }
+        .hero-slide.active { opacity: 1; }
+        .hero-slide-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(180deg, rgba(10,10,8,0.35) 0%, rgba(10,10,8,0.25) 45%, rgba(10,10,8,0.75) 100%);
+        }
         .community-hero h1 {
+            position: relative;
+            z-index: 2;
             font-family: Figtree, sans-serif;
             font-size: clamp(2.5rem, 7vw, 5.5rem);
             font-weight: 400;
@@ -54,6 +78,7 @@
             text-transform: uppercase;
             line-height: 1.1;
             letter-spacing: -0.01em;
+            text-shadow: 0 2px 30px rgba(0,0,0,0.4);
         }
 
         /* ===== Section Header ===== */
@@ -516,13 +541,29 @@
     <!-- Hero -->
     <div class="community-hero-wrap">
         <section class="community-hero">
+            <div class="hero-slides" id="heroSlides">
+                <div class="hero-slide active" style="background-image: url('assets/images/community-hero/ch01.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch02.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch03.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch04.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch05.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch06.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch07.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch08.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch09.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch10.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch11.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch12.webp')"></div>
+                <div class="hero-slide" style="background-image: url('assets/images/community-hero/ch13.webp')"></div>
+            </div>
+            <div class="hero-slide-overlay"></div>
             <h1>The Fighters,<br>The Movers,<br>The Thinkers.</h1>
         </section>
     </div>
 
     <!-- Section Header — Events -->
     <div class="section-header">
-        <h2>Community</h2>
+        <h2>Community Events</h2>
     </div>
 
     <!-- Events Grid -->
@@ -874,6 +915,20 @@
                 menuBtn.classList.remove('active');
             });
         });
+
+        // Hero photo slideshow — crossfade every 4.5s
+        (function () {
+            const slidesWrap = document.getElementById('heroSlides');
+            if (!slidesWrap) return;
+            const slides = slidesWrap.querySelectorAll('.hero-slide');
+            if (slides.length < 2) return;
+            let i = 0;
+            setInterval(function () {
+                slides[i].classList.remove('active');
+                i = (i + 1) % slides.length;
+                slides[i].classList.add('active');
+            }, 4500);
+        })();
 
         // Trainers carousel arrows
         (function () {
