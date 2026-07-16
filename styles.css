@@ -1633,6 +1633,11 @@ em {
         display: none;
     }
 
+    /* Header CTA hides on mobile — it lives in the menu overlay there */
+    .nav > .nav-link--cta {
+        display: none;
+    }
+
     .nav-menu-btn {
         display: block;
     }
