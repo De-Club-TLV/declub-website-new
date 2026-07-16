@@ -53,6 +53,7 @@
     var href = link.getAttribute('href') || '';
     if (href.indexOf('wa.me') !== -1) return;
     if (href.indexOf('whatsapp') !== -1) return;
+    if (href.indexOf('arbox.link') !== -1) return; // trial booking → Arbox, not the modal
     link.addEventListener('click', openModal);
   });
 
