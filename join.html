@@ -153,6 +153,18 @@
                 <h2 class="section-title">This week<br>at <em>De Club</em></h2>
                 <p class="schedule-sub">Boxing, movement, and recovery across VUCA, ART, and LIVO. Come find your rhythm.</p>
             </div>
+            <div class="schedule-controls">
+                <div class="schedule-floors" id="scheduleFloors">
+                    <button type="button" class="schedule-floor-btn is-active" data-floor="VUCA">VUCA</button>
+                    <button type="button" class="schedule-floor-btn" data-floor="ART">ART</button>
+                    <button type="button" class="schedule-floor-btn" data-floor="LIVO">LIVO</button>
+                </div>
+                <div class="schedule-weeknav">
+                    <button type="button" class="schedule-nav-btn" id="schedPrev" aria-label="Previous week">&#8249;</button>
+                    <span class="schedule-week-label" id="schedWeekLabel"></span>
+                    <button type="button" class="schedule-nav-btn" id="schedNext" aria-label="Next week">&#8250;</button>
+                </div>
+            </div>
             <div class="schedule-grid" id="scheduleGrid">
                 <p class="schedule-loading">Loading schedule&hellip;</p>
             </div>
