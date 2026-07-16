@@ -1011,6 +1011,29 @@
     max-width: 480px;
 }
 
+.trial-cta-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.trial-cta-price-amount {
+    font-family: var(--font-body);
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-cream);
+    line-height: 1;
+}
+
+.trial-cta-price-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
 .trial-cta .btn {
     margin-top: 8px;
 }
