@@ -1979,29 +1979,46 @@ a.floor-card {
     flex-wrap: wrap;
     margin-bottom: 28px;
 }
+/* Floor picker — a segmented toggle so it's clear only one floor shows */
 .schedule-floors {
-    display: flex;
-    gap: 8px;
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--color-surface);
+    border: 1px solid rgba(177, 166, 150, 0.15);
+    border-radius: 100px;
 }
 .schedule-floor-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-text-muted);
     background: transparent;
-    border: 1px solid rgba(177, 166, 150, 0.2);
+    border: none;
     border-radius: 100px;
-    padding: 8px 20px;
+    padding: 9px 18px;
     cursor: pointer;
-    transition: color 0.25s, background 0.25s, border-color 0.25s;
+    transition: color 0.25s, background 0.25s;
 }
-.schedule-floor-btn:hover { color: var(--color-cream); }
+.schedule-floor-btn img {
+    width: 15px;
+    height: 15px;
+    filter: brightness(0) invert(0.6);
+    transition: filter 0.25s;
+}
+.schedule-floor-btn:hover:not(.is-active) { color: var(--color-cream); }
+.schedule-floor-btn:hover:not(.is-active) img { filter: brightness(0) invert(0.9); }
 .schedule-floor-btn.is-active {
     color: var(--color-bg);
-    background: var(--color-sage);
-    border-color: var(--color-sage);
 }
+.schedule-floor-btn.is-active img { filter: brightness(0); }
+.schedule-floor-btn.is-active[data-floor="VUCA"] { background: #b0c290; }
+.schedule-floor-btn.is-active[data-floor="ART"]  { background: #e0c48c; }
+.schedule-floor-btn.is-active[data-floor="LIVO"] { background: #93b7c6; }
 .schedule-weeknav {
     display: flex;
     align-items: center;
