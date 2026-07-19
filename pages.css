@@ -474,10 +474,18 @@
 
 .tiers-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    max-width: 1040px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 1240px;
     margin: 0 auto;
+}
+
+/* Tablet: 2x2 before collapsing to a single column at 900px. */
+@media (min-width: 901px) and (max-width: 1080px) {
+    .tiers-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 640px;
+    }
 }
 
 .tier-card {
