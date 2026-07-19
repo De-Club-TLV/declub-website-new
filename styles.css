@@ -1612,6 +1612,29 @@ em {
     letter-spacing: 0.03em;
 }
 
+.footer-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footer-credit {
+    font-size: 0.68rem;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+}
+
+.footer-credit a {
+    color: inherit;
+    border-bottom: 1px solid rgba(177, 166, 150, 0.25);
+    transition: color 0.3s, border-color 0.3s;
+}
+
+.footer-credit a:hover {
+    color: var(--color-cream);
+    border-color: var(--color-cream);
+}
+
 .footer-legal {
     display: flex;
     gap: 24px;
