@@ -161,11 +161,9 @@ function initAnimations() {
     const floorTop = document.getElementById('floorTop');
     const floorMiddle = document.getElementById('floorMiddle');
     const floorBottom = document.getElementById('floorBottom');
-    const floorBase = document.getElementById('floorBase');
     const floorLabelTop = document.getElementById('floorLabelTop');
     const floorLabelMiddle = document.getElementById('floorLabelMiddle');
     const floorLabelBottom = document.getElementById('floorLabelBottom');
-    const floorLabelBase = document.getElementById('floorLabelBase');
 
     if (floorTop && window.innerWidth > 900) {
         // Floors start stacked, then separate on scroll
@@ -181,12 +179,10 @@ function initAnimations() {
         // Start stacked together, spread apart
         gsap.set(floorTop, { y: 180 });
         gsap.set(floorBottom, { y: -60 });
-        if (floorBase) gsap.set(floorBase, { y: -180 });
 
         buildingTl
             .to(floorTop, { y: -20, duration: 1, ease: 'none' }, 0)
             .to(floorBottom, { y: 20, duration: 1, ease: 'none' }, 0);
-        if (floorBase) buildingTl.to(floorBase, { y: 20, duration: 1, ease: 'none' }, 0);
 
         // Labels fade in as floors separate
         ScrollTrigger.create({
@@ -196,13 +192,11 @@ function initAnimations() {
                 floorLabelTop.classList.add('visible');
                 floorLabelMiddle.classList.add('visible');
                 floorLabelBottom.classList.add('visible');
-                if (floorLabelBase) floorLabelBase.classList.add('visible');
             },
             onLeaveBack: () => {
                 floorLabelTop.classList.remove('visible');
                 floorLabelMiddle.classList.remove('visible');
                 floorLabelBottom.classList.remove('visible');
-                if (floorLabelBase) floorLabelBase.classList.remove('visible');
             }
         });
     } else {

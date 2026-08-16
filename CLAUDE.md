@@ -31,7 +31,8 @@ De Club is a wellness club in Tel Aviv (2 Bar-Giyora St.) combining boxing, move
 - `pages.css` - Floor detail page styles (hero, classes grid, gallery, CTAs)
 - `app.js` - Homepage JS (GSAP animations, floor building, scroll triggers)
 - `pages.js` - Floor page JS (gallery, scroll animations)
-- `echo-floor.svg` - Isometric SVG for Echo floor in the building animation
+
+Note: the isometric building on the homepage shows **three** floors (LIVO, ART, VUCA). The ECHO layer was removed on 2026-08-16 because its artwork did not match the other three; ECHO still has its own card below the building, plus nav and page. If a proper ECHO asset arrives, restore the `floor-svg--base` / `floor-label--base` blocks from git history and put the container height back.
 
 ## Contact Modal
 Every CTA button across all pages opens a contact popup (not a page navigation). The modal collects:

@@ -946,7 +946,9 @@ em {
     position: relative;
     max-width: 900px;
     margin: 0 auto;
-    height: 1100px;
+    /* Three floors: bottom sits at 460px and the SVG renders ~339px tall at
+       460px wide, plus the 20px the scroll timeline shifts it. */
+    height: 840px;
 }
 
 .floor-svg {
@@ -973,16 +975,6 @@ em {
 
 .floor-svg--bottom {
     top: 460px;
-}
-
-.floor-svg--base {
-    top: 700px;
-}
-
-.floor-svg--base svg {
-    width: 460px;
-    height: auto;
-    display: block;
 }
 
 /* Floor Labels */
@@ -1031,11 +1023,6 @@ em {
 .floor-label--bottom {
     right: 40px;
     top: 540px;
-}
-
-.floor-label--base {
-    left: 40px;
-    top: 800px;
 }
 
 .floor-label-name {
@@ -1671,7 +1658,7 @@ em {
     }
 
     .floors-building-inner {
-        height: 730px;
+        height: 620px;
     }
 
     .floor-svg--middle {
@@ -1680,10 +1667,6 @@ em {
 
     .floor-svg--bottom {
         top: 340px;
-    }
-
-    .floor-svg--base {
-        top: 510px;
     }
 
     .floor-label {
