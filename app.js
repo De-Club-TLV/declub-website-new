@@ -233,16 +233,6 @@ function initAnimations() {
         });
     });
 
-    // Quote
-    gsap.from('.quote p', {
-        scrollTrigger: { trigger: '.pull-quote', start: 'top 70%' },
-        opacity: 0, y: 30, duration: 1
-    });
-    gsap.from('.quote cite', {
-        scrollTrigger: { trigger: '.pull-quote', start: 'top 70%' },
-        opacity: 0, duration: 0.8, delay: 0.3
-    });
-
     // Philosophy
     gsap.from('.philosophy .section-tag', {
         scrollTrigger: { trigger: '.philosophy', start: 'top 75%' },
