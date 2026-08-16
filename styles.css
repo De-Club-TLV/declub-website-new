@@ -986,6 +986,11 @@ em {
     z-index: 3;
     opacity: 0;
     transition: opacity 0.5s var(--ease-out);
+    /* The inner is capped at 900px and the 460px-wide building sits centred in
+       it, so a label has ~180px of clear space on either side. Without a cap,
+       a longer tagline (ART's "Precision Through Motion") ran on over the
+       artwork, where muted grey on cream is unreadable. Wrap instead. */
+    max-width: 180px;
 }
 
 .floor-label.visible {
