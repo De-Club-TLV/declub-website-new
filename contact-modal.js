@@ -45,12 +45,19 @@
     }, 350);
   }
 
-  // GA4: fire a "book_trial_click" event when a trial CTA is clicked. GA4
+  // GA4: fire a "book_trial_click" event when an Arbox CTA is clicked. GA4
   // (G-PQBGX3M759) is loaded via GTM, which defines window.gtag, so we send the
   // event directly — no GTM tag needed. Also mirrored to dataLayer for GTM.
-  function trackTrialClick() {
+  //
+  // link_url is read off the clicked element rather than hardcoded. It used to
+  // name the old trial product, so it kept reporting a URL the site no longer
+  // linked to once the CTAs moved to Ritual Start. The event NAME is left as
+  // book_trial_click on purpose: renaming it would split the GA4 series and
+  // lose comparability against everything before 2026-08-20.
+  function trackTrialClick(e) {
+    var el = e && e.currentTarget;
     var params = {
-      link_url: 'https://arbox.link/7xhtp1Nv',
+      link_url: (el && el.getAttribute('href')) || '',
       page_path: window.location.pathname,
     };
     try {
