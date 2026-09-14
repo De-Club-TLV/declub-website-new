@@ -78,6 +78,9 @@
     var href = link.getAttribute('href') || '';
     if (href.indexOf('wa.me') !== -1) return;
     if (href.indexOf('whatsapp') !== -1) return;
+    // In-page anchors ("#formats", "#classes") and deep links to a section
+    // ("join.html#pricing") are navigation, not lead CTAs. Let them through.
+    if (href.indexOf('#') !== -1) return;
     if (href.indexOf('arbox.link') !== -1) {
       link.addEventListener('click', trackTrialClick); // GA4 track, then navigate to Arbox
       return;
