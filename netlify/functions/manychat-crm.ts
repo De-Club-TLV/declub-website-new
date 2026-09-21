@@ -540,6 +540,132 @@ async function createCaptureLead(args: {
   return { contactId, leadId };
 }
 
+// ─── Arbox (CRM to Arbox migration, dual-write phase, 2026-09) ─────────────
+// Arbox is becoming the pipeline and the person record; Monday stays the
+// source of truth until cut-over. Every Arbox step here is NON-FATAL and
+// time-boxed: ManyChat is waiting on this response, and the reply shape
+// (contact_id = Monday id) must not change.
+//
+// Facts verified live 2026-09-21: POST /v3/leads does not dedupe (search
+// first), searchUser matches Israeli phones in any format, email cannot be
+// PATCHed, names can. IDs mirror General/src/shared/arbox-leads.ts.
+const ARBOX_API = process.env.ARBOX_BASE_URL ?? "https://arboxserver.arboxapp.com/api/public";
+const ARBOX_LEADS_LOCATION_ID = Number(process.env.ARBOX_LEADS_LOCATION_ID ?? "21230");
+const ARBOX_STATUS_FOLLOW_UP = 54453;
+const ARBOX_SOURCE_WHATSAPP = 125545;
+const ARBOX_FIELD_WHATSAPP_OPT_IN = "custom-field-1881";
+const ARBOX_FIELD_MANYCHAT_ID = "custom-field-1882";
+const ARBOX_FIELD_LEAD_TYPE = "custom-field-1883";
+const ARBOX_TIMEOUT_MS = 5000;
+
+function arboxEnabled(): boolean {
+  return !!process.env.ARBOX_API_KEY && process.env.ARBOX_LEAD_SYNC !== "off";
+}
+
+async function arbox<T = any>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${ARBOX_API}${path}`, {
+    method,
+    headers: {
+      "api-key": process.env.ARBOX_API_KEY ?? "",
+      "Content-Type": "application/json",
+      "User-Agent": "declub-automation/1.0",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal: AbortSignal.timeout(ARBOX_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`Arbox HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return (await res.json()) as T;
+}
+
+interface ArboxPerson {
+  user_id: number;
+  user_role: string | null;
+}
+
+async function arboxFindByPhone(phone: string): Promise<ArboxPerson | null> {
+  const digits = toWhatsappId(phone);
+  if (!digits) return null;
+  const res = await arbox<{ data?: ArboxPerson[] | null }>(
+    "GET",
+    `/v3/users/searchUser?type=phone&value=${encodeURIComponent(digits)}`
+  );
+  const matches = res.data ?? [];
+  if (matches.length === 0) return null;
+  // A member wins over a lead, so a client is never treated as a fresh lead.
+  return matches.find((m) => (m.user_role ?? "").toLowerCase() !== "lead") ?? matches[0];
+}
+
+/** Israeli numbers go in the local 05X form staff use; foreign ones as +digits. */
+function arboxPhoneFormat(phone: string): string {
+  const digits = toWhatsappId(phone);
+  return digits.startsWith("972") ? "0" + digits.slice(3) : "+" + digits;
+}
+
+// First WhatsApp message from someone new: Arbox lead, status Follow Up (they
+// already wrote to us), source WhatsApp, opt-in yes. If Arbox already knows the
+// phone, only link the ManyChat id (and the opt-in, since they messaged first).
+async function arboxCaptureLead(args: {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  subscriberId: string;
+  viaWebsiteButton: boolean;
+  isNewToCrm: boolean;
+}): Promise<void> {
+  if (!arboxEnabled()) return;
+  const link: Record<string, string>[] = [];
+  if (args.subscriberId) link.push({ [ARBOX_FIELD_MANYCHAT_ID]: args.subscriberId });
+
+  const existing = await arboxFindByPhone(args.phone);
+  if (existing) {
+    if (args.isNewToCrm) link.push({ [ARBOX_FIELD_WHATSAPP_OPT_IN]: "yes" });
+    if (link.length > 0) {
+      await arbox("PATCH", "/v3/users", { user_id: existing.user_id, customFields: link });
+    }
+    return;
+  }
+  // Known on Monday but not in Arbox: the Monday import brings them over.
+  if (!args.isNewToCrm) return;
+
+  await arbox("POST", "/v3/leads", {
+    first_name: args.firstName || "WhatsApp Lead",
+    last_name: args.lastName || null,
+    phone: arboxPhoneFormat(args.phone),
+    location_id: ARBOX_LEADS_LOCATION_ID,
+    status_id: ARBOX_STATUS_FOLLOW_UP,
+    source_id: ARBOX_SOURCE_WHATSAPP,
+    campaign: args.viaWebsiteButton ? "Website WhatsApp button" : null,
+    comment: args.viaWebsiteButton
+      ? "First WhatsApp message, via a WhatsApp button on declub.co.il"
+      : "First WhatsApp message (direct)",
+    customFields: [
+      { [ARBOX_FIELD_WHATSAPP_OPT_IN]: "yes" },
+      { [ARBOX_FIELD_LEAD_TYPE]: "Organic" },
+      ...link,
+    ],
+  });
+}
+
+// update_name only receives the Monday contact_id, so the phone is read back
+// from the Contact to find the person in Arbox. Only a LEAD is renamed: a
+// member's name was entered by staff or by the member.
+async function arboxRenameLead(contactId: string, firstName: string, lastName: string): Promise<void> {
+  if (!arboxEnabled()) return;
+  const data = await gql<any>(
+    `query ($ids: [ID!], $cols: [String!]) { items(ids: $ids) { column_values(ids: $cols) { text } } }`,
+    { ids: [contactId], cols: [CONTACT_PHONE_COL] }
+  );
+  const phone: string = data?.items?.[0]?.column_values?.[0]?.text ?? "";
+  if (!phone) return;
+  const person = await arboxFindByPhone(phone);
+  if (!person || (person.user_role ?? "").toLowerCase() !== "lead") return;
+  await arbox("PATCH", "/v3/users", {
+    user_id: person.user_id,
+    first_name: firstName,
+    ...(lastName ? { last_name: lastName } : {}),
+  });
+}
+
 // ─── Action: capture ──────────────────────────────────────────────────────
 // Fires on the FIRST WhatsApp message from a contact, whatever the text.
 // - Already in CRM: do nothing except ensure the ManyChat id + link are set.
@@ -574,6 +700,18 @@ async function handleCapture(payload: any): Promise<NetlifyResponse> {
     } catch (err) {
       console.error("ensureContactManychat failed (non-fatal):", (err as Error).message);
     }
+    try {
+      await arboxCaptureLead({
+        firstName,
+        lastName,
+        phone,
+        subscriberId,
+        viaWebsiteButton: lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX),
+        isNewToCrm: false,
+      });
+    } catch (err) {
+      console.error("arbox link failed (non-fatal):", (err as Error).message);
+    }
     return json(200, { exists: true, contact_id: existing.contactId });
   }
 
@@ -588,6 +726,18 @@ async function handleCapture(payload: any): Promise<NetlifyResponse> {
     sourceLabel,
     subscriberId,
   });
+  try {
+    await arboxCaptureLead({
+      firstName,
+      lastName,
+      phone,
+      subscriberId,
+      viaWebsiteButton: sourceLabel === "Website",
+      isNewToCrm: true,
+    });
+  } catch (err) {
+    console.error("arbox capture failed (non-fatal, Monday has the lead):", (err as Error).message);
+  }
   return json(200, { exists: false, contact_id: contactId, lead_id: leadId });
 }
 
@@ -732,6 +882,12 @@ async function handleUpdateName(payload: any): Promise<NetlifyResponse> {
       // non-fatal — Contact rename is the primary effect; nightly
       // crm-cleanup will reconcile any lingering name drift.
     }
+  }
+
+  try {
+    await arboxRenameLead(contactId, firstName, lastName);
+  } catch (err) {
+    console.error("arbox rename failed (non-fatal):", (err as Error).message);
   }
 
   return json(200, { ok: true, contact_id: contactId, renamed_leads: leadIds.length });
