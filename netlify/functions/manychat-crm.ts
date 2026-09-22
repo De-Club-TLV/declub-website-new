@@ -110,6 +110,16 @@ function splitName(full: string): { first: string; last: string } {
   return { first: parts[0] ?? "", last: parts.slice(1).join(" ") };
 }
 
+// Mirror of General/src/shared/phone.ts::toWhatsappId: digits only,
+// international, Israeli locals promoted to 972.
+function toWhatsappId(phone: string): string {
+  const cleaned = phone.replace(/[^\d+]/g, "");
+  let digits = cleaned.startsWith("+") ? cleaned.slice(1) : cleaned;
+  if (digits.startsWith("0") && digits.length === 10) digits = "972" + digits.slice(1);
+  else if (digits.startsWith("5") && digits.length === 9) digits = "972" + digits;
+  return digits.replace(/\D/g, "");
+}
+
 // Stamp the phone_lookup custom field on the ManyChat subscriber so our system
 // can always resolve them by phone. Non-fatal: never block the greet branch.
 async function stampPhoneLookup(subscriberId: string, phone: string): Promise<void> {
