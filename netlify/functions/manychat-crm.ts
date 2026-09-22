@@ -1,6 +1,8 @@
 import { timingSafeEqual } from "node:crypto";
 
-// Netlify Function: handle ManyChat WA conversation-start flow. Two actions
+// Netlify Function: handle ManyChat WA conversation-start flow, on Arbox since
+// 2026-09-22 (the Monday version is archived in _archive/netlify-functions/
+// manychat-crm.monday.ts). Two actions
 // dispatched via the `action` field:
 //
 //   1. action="greet" — looks up the Contact in Monday by phone.
@@ -31,7 +33,6 @@ import { timingSafeEqual } from "node:crypto";
 // Auth: bearer token `X-Manychat-Token` matching `WEBHOOK_MANYCHAT_TOKEN`
 // in Netlify env. Same model as the website lead-intake path.
 
-const MONDAY_API = "https://api.monday.com/v2";
 const MANYCHAT_API = "https://api.manychat.com/fb";
 
 // The custom field our whole system searches by (findByCustomField). ManyChat
@@ -44,27 +45,7 @@ const PHONE_LOOKUP_FIELD_ID = Number(
   process.env.MANYCHAT_FIELD_PHONE_LOOKUP ?? "14505849"
 );
 
-// De Club CRM board + column IDs (mirror of General/src/shared/config.ts).
-// Hardcoded because Netlify Functions can't import from the General/ repo.
-// Bump these alongside config.ts when the schema changes.
-const CONTACTS_BOARD_ID = "5022104625";
-const LEADS_BOARD_ID = "5022104620";
-const CONTACTS_LEADS_GROUP_ID = "new_group95562";
-const LEADS_NEW_GROUP_ID = "group_mkxq2aj9";
-const CONTACT_PHONE_COL = "contact_phone";
-const CONTACT_TYPE_COL = "status";
-const LEAD_STATUS_COL = "lead_status";
-const LEAD_SOURCE_COL = "color_mkwba3e8";
-const LEAD_TYPE_COL = "color_mkwbcm0n";
-const LEAD_DATE_COL = "date_mkwg62xr";
-const LEAD_CONTACT_RELATION_COL = "board_relation_mkwaq2js";
-const CONTACT_LEAD_RELATION_COL = "board_relation_mkzy8749";
-const CONTACT_MANYCHAT_ID_COL = "text_mkwcgpxt";
-const CONTACT_MANYCHAT_LINK_COL = "link_mkwff7hj";
-const CONTACT_OPT_IN_COL = "boolean_mkwe3v1b";
-const LEADS_FOLLOWUP_GROUP_ID = "group_mkwb2j5j";
 
-const CONTACT_GENDER_COL = "color_mkwcfe01";
 
 // ManyChat page id — used to build the live-chat URL stored on the Contact's
 // ManyChat Link column (https://app.manychat.com/fb<page>/chat/<subscriber>).
@@ -88,15 +69,6 @@ function manychatLinkValue(
   return { url, text: fn ? `manychat.com/${fn}` : url };
 }
 
-// Monday label indices (LEAD_SOURCE / LEAD_TYPE / etc — mirror of
-// General/src/shared/monday.ts).
-const LEAD_SOURCE_MANYCHAT = 4;
-const LEAD_SOURCE_WEBSITE = 11;
-const LEAD_TYPE_ORGANIC = 0;
-const LEAD_STATUS_NEW = 5;
-const CONTACT_TYPE_LEAD = 0;
-const CONTACT_GENDER_MALE = 0;
-const CONTACT_GENDER_FEMALE = 3;
 
 // Magic prefix in `last_input` that tells us the user clicked a wa.me link
 // on declub.co.il (every WA button on the site uses `?text=Hi%20De%20Club!`).
@@ -133,263 +105,9 @@ function constantTimeEquals(a: string, b: string): boolean {
   return timingSafeEqual(ba, bb);
 }
 
-async function gql<T = any>(query: string, variables: Record<string, unknown>): Promise<T> {
-  const token = process.env.MONDAY_API_TOKEN;
-  if (!token) throw new Error("MONDAY_API_TOKEN missing");
-  const res = await fetch(MONDAY_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: token },
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!res.ok) throw new Error(`Monday HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const data: any = await res.json();
-  if (data.errors) throw new Error(`Monday: ${JSON.stringify(data.errors).slice(0, 300)}`);
-  return data.data;
-}
-
-// Phone format variants — try the exact ManyChat-passed value, digits-only,
-// E.164 with/without leading +, and the Israeli 05x form. Catches drift
-// between how Contacts were saved historically (n8n era often used 0xx,
-// new intake uses 972...).
-function phoneVariants(raw: string): string[] {
-  const digits = raw.replace(/\D/g, "");
-  const variants = new Set<string>();
-  if (raw) variants.add(raw);
-  if (digits) variants.add(digits);
-  if (digits.startsWith("972")) {
-    variants.add("+" + digits);
-    variants.add("0" + digits.slice(3));
-  } else if (digits.startsWith("0") && digits.length === 10) {
-    variants.add("972" + digits.slice(1));
-    variants.add("+972" + digits.slice(1));
-  }
-  return [...variants].filter(Boolean);
-}
-
-async function lookupContactByPhone(
-  phone: string
-): Promise<{ contactId: string; name: string } | null> {
-  for (const value of phoneVariants(phone)) {
-    const data = await gql<any>(
-      `query ($boardId: ID!, $col: String!, $val: String!) {
-        items_page_by_column_values(
-          board_id: $boardId
-          limit: 1
-          columns: [{ column_id: $col, column_values: [$val] }]
-        ) { items { id name } }
-      }`,
-      { boardId: CONTACTS_BOARD_ID, col: CONTACT_PHONE_COL, val: value }
-    );
-    const items = data.items_page_by_column_values.items;
-    if (items.length > 0) {
-      return { contactId: items[0].id, name: items[0].name };
-    }
-  }
-  return null;
-}
-
 function splitName(full: string): { first: string; last: string } {
   const parts = full.trim().split(/\s+/);
   return { first: parts[0] ?? "", last: parts.slice(1).join(" ") };
-}
-
-function containsHebrew(s: string): boolean {
-  return /[֐-׿יִ-ﭏ]/.test(s);
-}
-
-// Inline mirror of General/src/shared/translate.ts::analyzeName. Calls
-// Anthropic Claude Haiku via direct HTTP (no SDK dep) to phonetically
-// transliterate Hebrew names to English + detect gender. Used during
-// Contact creation so Monday's CRM stays English-only per project convention.
-//
-// Non-throwing: on any failure, falls back to {englishName: rawName,
-// gender: "female"}. Better to write a Hebrew-named Contact than refuse
-// to create one. The nightly crm-cleanup re-syncs names from Leads later.
-async function analyzeName(rawName: string): Promise<{ englishName: string; gender: "male" | "female" }> {
-  const trimmed = rawName.trim();
-  if (!trimmed) return { englishName: "", gender: "female" };
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    // No API key — return raw. Production deploy should always have it.
-    return { englishName: trimmed, gender: "female" };
-  }
-
-  // Skip the API call when input is purely Latin script — no transliteration
-  // needed. We still don't get a gender guess that way; default to female,
-  // crm-cleanup / sales can correct.
-  if (!containsHebrew(trimmed)) {
-    return { englishName: trimmed, gender: "female" };
-  }
-
-  const model = process.env.ANTHROPIC_TRANSLATE_MODEL || "claude-haiku-4-5-20251001";
-  const system =
-    "You analyze a person's name and return ONLY a JSON object of the form " +
-    '{"englishName":"...","gender":"male"|"female"} with no surrounding text, ' +
-    "no markdown, no explanation.\n\n" +
-    "CRITICAL: Treat the ENTIRE input as a proper name — a single identifier. " +
-    "Never translate meaning. Transliterate the SOUND, not the WORD. " +
-    "This holds even when the name happens to be spelled the same as a common " +
-    "Hebrew word. The person picked that spelling as their name; preserve it.\n\n" +
-    "Rules:\n" +
-    "1. englishName: if the input is in Hebrew, PHONETICALLY transliterate to English.\n" +
-    "   Examples (correct → wrong):\n" +
-    "   • 'יובל כץ' → 'Yuval Katz' (NOT 'Yield Edge')\n" +
-    "   • 'אגוז' → 'Egoz' (NOT 'Nut')\n" +
-    "   • 'שחר' → 'Shahar' (NOT 'Dawn')\n" +
-    "   • 'ברק' → 'Barak' (NOT 'Lightning')\n" +
-    "   • 'אור' → 'Or' (NOT 'Light')\n" +
-    "   Use standard modern Israeli Hebrew romanization. If the input is already " +
-    "in Latin script, pass it through unchanged (preserve original spelling/capitalization).\n" +
-    "2. gender: MUST be exactly 'male' or 'female'. Never 'unknown' or anything else. " +
-    "If the first name is truly ambiguous (unisex), pick your best statistical guess. " +
-    "Israeli context: if the name suggests Israeli-Hebrew origin, weight by common " +
-    "Israeli gender usage (e.g., 'יובל' is unisex but slightly more common as male).";
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 200,
-        system,
-        messages: [{ role: "user", content: trimmed }],
-      }),
-    });
-    if (!res.ok) throw new Error(`anthropic HTTP ${res.status}`);
-    const data: any = await res.json();
-    const text = (data?.content ?? [])
-      .filter((b: any) => b?.type === "text")
-      .map((b: any) => b.text)
-      .join("")
-      .trim();
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error(`no JSON in response: ${text.slice(0, 100)}`);
-    const parsed: any = JSON.parse(match[0]);
-    const englishName =
-      typeof parsed.englishName === "string" && parsed.englishName.trim()
-        ? parsed.englishName.trim()
-        : trimmed;
-    const gender = parsed.gender === "male" ? "male" : "female";
-    return { englishName, gender };
-  } catch {
-    return { englishName: trimmed, gender: "female" };
-  }
-}
-
-async function createContactAndLead(args: {
-  name: string;
-  phone: string;
-  sourceIndex: number;
-  genderIndex?: number;
-}): Promise<{ contactId: string; leadId: string }> {
-  // Create Contact
-  const contactCv: Record<string, unknown> = {
-    [CONTACT_PHONE_COL]: { phone: args.phone, countryShortName: "IL" },
-    [CONTACT_TYPE_COL]: { index: CONTACT_TYPE_LEAD },
-  };
-  if (args.genderIndex != null) {
-    contactCv[CONTACT_GENDER_COL] = { index: args.genderIndex };
-  }
-  const cdata = await gql<any>(
-    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
-      create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
-    }`,
-    {
-      boardId: CONTACTS_BOARD_ID,
-      groupId: CONTACTS_LEADS_GROUP_ID,
-      name: args.name,
-      cv: JSON.stringify(contactCv),
-    }
-  );
-  const contactId: string = cdata.create_item.id;
-
-  // Create Lead (without the relation; set in step 2 to mirror createLead in
-  // General/src/shared/monday.ts which separates create + relation linkage)
-  const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10);
-  const timeStr = now.toISOString().slice(11, 19);
-  const leadCv: Record<string, unknown> = {
-    [LEAD_STATUS_COL]: { index: LEAD_STATUS_NEW },
-    [LEAD_SOURCE_COL]: { index: args.sourceIndex },
-    [LEAD_TYPE_COL]: { index: LEAD_TYPE_ORGANIC },
-    [LEAD_DATE_COL]: { date: dateStr, time: timeStr },
-  };
-  const ldata = await gql<any>(
-    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
-      create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
-    }`,
-    {
-      boardId: LEADS_BOARD_ID,
-      groupId: LEADS_NEW_GROUP_ID,
-      name: args.name,
-      cv: JSON.stringify(leadCv),
-    }
-  );
-  const leadId: string = ldata.create_item.id;
-
-  // Link Lead → Contact (relation column needs a separate mutation per Monday convention)
-  await gql<any>(
-    `mutation ($leadId: ID!, $boardId: ID!, $col: String!, $val: JSON!) {
-      change_column_value(item_id: $leadId, board_id: $boardId, column_id: $col, value: $val) { id }
-    }`,
-    {
-      leadId,
-      boardId: LEADS_BOARD_ID,
-      col: LEAD_CONTACT_RELATION_COL,
-      val: JSON.stringify({ item_ids: [parseInt(contactId, 10)] }),
-    }
-  );
-
-  return { contactId, leadId };
-}
-
-async function fetchLinkedLeadIds(contactId: string): Promise<string[]> {
-  const data = await gql<any>(
-    `query ($itemId: ID!, $col: [String!]) {
-      items(ids: [$itemId]) {
-        column_values(ids: $col) { ... on BoardRelationValue { linked_item_ids } }
-      }
-    }`,
-    { itemId: contactId, col: [CONTACT_LEAD_RELATION_COL] }
-  );
-  const ids: string[] = data?.items?.[0]?.column_values?.[0]?.linked_item_ids ?? [];
-  return ids.map((id) => String(id));
-}
-
-async function renameItem(itemId: string, boardId: string, newName: string): Promise<void> {
-  // Use change_multiple_column_values with `{name: newName}` — that's how
-  // shared/monday.ts in General/ does it. change_simple_column_value with
-  // column_id="name" isn't documented and rejection-prone.
-  await gql<any>(
-    `mutation ($itemId: ID!, $boardId: ID!, $cv: JSON!) {
-      change_multiple_column_values(item_id: $itemId, board_id: $boardId, column_values: $cv) { id }
-    }`,
-    {
-      itemId,
-      boardId,
-      cv: JSON.stringify({ name: newName }),
-    }
-  );
-}
-
-// Mirror of General/src/shared/phone.ts::toWhatsappId (normalizePhone → digits
-// only). MUST produce the exact same value our code searches with, or the
-// stamped phone_lookup won't match findByCustomField.
-function toWhatsappId(phone: string): string {
-  const cleaned = phone.replace(/[^\d+]/g, "");
-  let norm: string;
-  if (cleaned.startsWith("+")) norm = cleaned.slice(1);
-  else if (cleaned.startsWith("0") && cleaned.length === 10) norm = "972" + cleaned.slice(1);
-  else if (cleaned.startsWith("972")) norm = cleaned;
-  else if (cleaned.startsWith("5") && cleaned.length === 9) norm = "972" + cleaned;
-  else norm = cleaned;
-  return norm.replace(/\D/g, "");
 }
 
 // Stamp the phone_lookup custom field on the ManyChat subscriber so our system
@@ -447,122 +165,80 @@ async function getContactManychatFields(
   };
 }
 
-// Ensure an existing Contact carries its ManyChat id + link — set only when
-// missing, never clobber. Used for contacts already in the CRM.
-async function ensureContactManychat(
-  contactId: string,
-  subscriberId: string,
-  firstName: string
-): Promise<void> {
-  if (!subscriberId) return;
-  const cur = await getContactManychatFields(contactId);
-  const cv: Record<string, unknown> = {};
-  if (!cur.id) cv[CONTACT_MANYCHAT_ID_COL] = subscriberId;
-  if (!cur.link) {
-    const link = manychatLinkValue(subscriberId, firstName);
-    if (link) cv[CONTACT_MANYCHAT_LINK_COL] = link;
-  }
-  if (Object.keys(cv).length === 0) return;
-  await gql<any>(
-    `mutation ($boardId: ID!, $itemId: ID!, $cv: JSON!) {
-      change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $cv) { id }
-    }`,
-    { boardId: CONTACTS_BOARD_ID, itemId: contactId, cv: JSON.stringify(cv) }
-  );
+
+
+// ─── Arbox: the CRM since 2026-09-22 ────────────────────────────────────────
+// Monday Contacts / Leads are retired. `contact_id` returned to ManyChat is now
+// the Arbox user id (ManyChat only needs it non-empty to branch). Facts verified
+// live 2026-09-21: POST /v3/leads does not dedupe (search first), searchUser
+// matches Israeli phones in any format, names can be PATCHed, email cannot.
+const ARBOX_API = process.env.ARBOX_BASE_URL ?? "https://arboxserver.arboxapp.com/api/public";
+const ARBOX_LEADS_LOCATION_ID = Number(process.env.ARBOX_LEADS_LOCATION_ID ?? "21230");
+const ARBOX_STATUS_FOLLOW_UP = 54453;
+const ARBOX_SOURCE_WHATSAPP = 125545;
+const ARBOX_FIELD_WHATSAPP_OPT_IN = "custom-field-1881";
+const ARBOX_FIELD_MANYCHAT_ID = "custom-field-1882";
+const ARBOX_FIELD_LEAD_TYPE = "custom-field-1883";
+const ARBOX_TIMEOUT_MS = 6000;
+
+async function arbox<T = any>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${ARBOX_API}${path}`, {
+    method,
+    headers: {
+      "api-key": process.env.ARBOX_API_KEY ?? "",
+      "Content-Type": "application/json",
+      "User-Agent": "declub-automation/1.0",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal: AbortSignal.timeout(ARBOX_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`Arbox HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return (await res.json()) as T;
 }
 
-// Create a Contact + Lead for a cold WhatsApp inbound — given name + phone,
-// lead status Follow Up, ManyChat id + link on the Contact. Uses label-based
-// status/type values (unambiguous vs index). Returns the new ids.
-async function createCaptureLead(args: {
-  name: string;
+interface ArboxPerson { user_id: number; first_name: string | null; last_name: string | null; user_role: string | null }
+
+async function arboxFindByPhone(phone: string): Promise<ArboxPerson | null> {
+  const digits = toWhatsappId(phone);
+  if (!digits) return null;
+  const res = await arbox<{ data?: ArboxPerson[] | null }>("GET", `/v3/users/searchUser?type=phone&value=${encodeURIComponent(digits)}`);
+  const matches = res.data ?? [];
+  if (matches.length === 0) return null;
+  // A member wins over a lead, so a client is never treated as a fresh lead.
+  return matches.find((m) => (m.user_role ?? "").toLowerCase() !== "lead") ?? matches[0];
+}
+
+/** Israeli numbers go in the local 05X form staff use; foreign ones as +digits. */
+function arboxPhoneFormat(phone: string): string {
+  const digits = toWhatsappId(phone);
+  return digits.startsWith("972") ? "0" + digits.slice(3) : "+" + digits;
+}
+
+async function arboxCreateWhatsappLead(args: {
   firstName: string;
+  lastName: string;
   phone: string;
-  sourceLabel: string;
   subscriberId: string;
-}): Promise<{ contactId: string; leadId: string }> {
-  const contactCv: Record<string, unknown> = {
-    [CONTACT_PHONE_COL]: { phone: args.phone, countryShortName: "IL" },
-    [CONTACT_TYPE_COL]: { label: "Lead" },
-    // Messaging the business on WhatsApp is an opt-in — check the box.
-    [CONTACT_OPT_IN_COL]: { checked: "true" },
-  };
-  if (args.subscriberId) {
-    contactCv[CONTACT_MANYCHAT_ID_COL] = args.subscriberId;
-    const link = manychatLinkValue(args.subscriberId, args.firstName);
-    if (link) contactCv[CONTACT_MANYCHAT_LINK_COL] = link;
-  }
-  const cdata = await gql<any>(
-    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
-      create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
-    }`,
-    {
-      boardId: CONTACTS_BOARD_ID,
-      groupId: CONTACTS_LEADS_GROUP_ID,
-      name: args.name,
-      cv: JSON.stringify(contactCv),
-    }
-  );
-  const contactId: string = cdata.create_item.id;
-
-  const now = new Date();
-  const leadCv: Record<string, unknown> = {
-    [LEAD_STATUS_COL]: { label: "Follow Up" },
-    [LEAD_SOURCE_COL]: { label: args.sourceLabel },
-    [LEAD_TYPE_COL]: { label: "Organic" },
-    [LEAD_DATE_COL]: { date: now.toISOString().slice(0, 10), time: now.toISOString().slice(11, 19) },
-  };
-  const ldata = await gql<any>(
-    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cv: JSON!) {
-      create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cv) { id }
-    }`,
-    {
-      boardId: LEADS_BOARD_ID,
-      groupId: LEADS_FOLLOWUP_GROUP_ID,
-      name: args.name,
-      cv: JSON.stringify(leadCv),
-    }
-  );
-  const leadId: string = ldata.create_item.id;
-
-  await gql<any>(
-    `mutation ($leadId: ID!, $boardId: ID!, $col: String!, $val: JSON!) {
-      change_column_value(item_id: $leadId, board_id: $boardId, column_id: $col, value: $val) { id }
-    }`,
-    {
-      leadId,
-      boardId: LEADS_BOARD_ID,
-      col: LEAD_CONTACT_RELATION_COL,
-      val: JSON.stringify({ item_ids: [parseInt(contactId, 10)] }),
-    }
-  );
-
-  return { contactId, leadId };
-}
-
-// ─── Arbox (CRM to Arbox migration, dual-write phase, 2026-09) ─────────────
-// Arbox is becoming the pipeline and the person record; Monday stays the
-// source of truth until cut-over. The Arbox write does NOT run here: ManyChat
-// gives up after 10s and a new-lead capture already spends several seconds on
-// Monday (8.6s measured with the Arbox calls inline, 2026-09-21). So this only
-// fires the Trigger.dev task `arbox-whatsapp-lead` and moves on. Non-fatal, and
-// the reply to ManyChat (contact_id = Monday id) is unchanged.
-const ARBOX_TASK_URL = "https://api.trigger.dev/api/v1/tasks/arbox-whatsapp-lead/trigger";
-
-async function fireArboxTask(payload: Record<string, unknown>): Promise<void> {
-  const triggerKey = process.env.TRIGGER_PROD_SECRET_KEY;
-  if (!triggerKey || process.env.ARBOX_LEAD_SYNC === "off") return;
-  try {
-    const res = await fetch(ARBOX_TASK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${triggerKey}` },
-      body: JSON.stringify({ payload }),
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!res.ok) console.error(`arbox task trigger HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  } catch (err) {
-    console.error("arbox task trigger failed (non-fatal):", (err as Error).message);
-  }
+  viaWebsiteButton: boolean;
+}): Promise<number> {
+  const res = await arbox<{ data: { user_id: number } }>("POST", "/v3/leads", {
+    first_name: args.firstName || "WhatsApp Lead",
+    last_name: args.lastName || null,
+    phone: arboxPhoneFormat(args.phone),
+    location_id: ARBOX_LEADS_LOCATION_ID,
+    status_id: ARBOX_STATUS_FOLLOW_UP,
+    source_id: ARBOX_SOURCE_WHATSAPP,
+    campaign: args.viaWebsiteButton ? "Website WhatsApp button" : null,
+    comment: args.viaWebsiteButton
+      ? "First WhatsApp message, via a WhatsApp button on declub.co.il"
+      : "First WhatsApp message (direct)",
+    customFields: [
+      { [ARBOX_FIELD_WHATSAPP_OPT_IN]: "yes" },
+      { [ARBOX_FIELD_LEAD_TYPE]: "Organic" },
+      ...(args.subscriberId ? [{ [ARBOX_FIELD_MANYCHAT_ID]: args.subscriberId }] : []),
+    ],
+  });
+  return res.data.user_id;
 }
 
 // ─── Action: capture ──────────────────────────────────────────────────────
@@ -591,170 +267,42 @@ async function handleCapture(payload: any): Promise<NetlifyResponse> {
     }
   }
 
-  const existing = await lookupContactByPhone(phone);
+  const existing = await arboxFindByPhone(phone);
   if (existing) {
-    // Already in the CRM — leave the lead/status alone; only backfill ManyChat.
-    try {
-      await ensureContactManychat(existing.contactId, subscriberId, firstName);
-    } catch (err) {
-      console.error("ensureContactManychat failed (non-fatal):", (err as Error).message);
+    // Already in Arbox: leave status alone, only link the ManyChat id.
+    if (subscriberId) {
+      try {
+        await arbox("PATCH", "/v3/users", { user_id: existing.user_id, customFields: [{ [ARBOX_FIELD_MANYCHAT_ID]: subscriberId }] });
+      } catch (err) {
+        console.error("arbox link failed (non-fatal):", (err as Error).message);
+      }
     }
-    await fireArboxTask({
-      action: "capture",
-      phone,
-      first_name: firstName,
-      last_name: lastName,
-      subscriber_id: subscriberId,
-      via_website_button: lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX),
-      is_new_to_crm: false,
-    });
-    return json(200, { exists: true, contact_id: existing.contactId });
+    return json(200, { exists: true, contact_id: String(existing.user_id) });
   }
 
-  // New contact — create immediately with the WhatsApp given name.
-  const givenName =
-    cleanNameInline([firstName, lastName].filter(Boolean).join(" ")) || "WhatsApp Lead";
-  const sourceLabel = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX) ? "Website" : "Manychat";
-  const { contactId, leadId } = await createCaptureLead({
-    name: givenName,
-    firstName,
+  const userId = await arboxCreateWhatsappLead({
+    firstName: cleanNameInline(firstName),
+    lastName: cleanNameInline(lastName),
     phone,
-    sourceLabel,
     subscriberId,
+    viaWebsiteButton: lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX),
   });
-  await fireArboxTask({
-    action: "capture",
-    phone,
-    first_name: firstName,
-    last_name: lastName,
-    subscriber_id: subscriberId,
-    via_website_button: sourceLabel === "Website",
-    is_new_to_crm: true,
-  });
-  return json(200, { exists: false, contact_id: contactId, lead_id: leadId });
+  return json(200, { exists: false, contact_id: String(userId), lead_id: String(userId) });
 }
 
-// ─── Action: greet ────────────────────────────────────────────────────────
-// Lookup-only. NO writes to Monday. ManyChat's flow branches on whether
-// `contact_id` is set in the response.
-//
-// Body: { phone }
-// Returns:
-//   exists  → { exists: true, contact_id }
-//   new     → { exists: false }    (no contact_id — that's the signal to ManyChat)
-//
-// We deliberately don't return the CRM name back to ManyChat: for existing
-// contacts ManyChat already has the user's WA profile {{first_name}} which
-// is what we want for the personalized greeting. For new contacts we
-// collect Hebrew name in the chat and send via action="create".
-async function handleGreet(payload: any): Promise<NetlifyResponse> {
-  const phone = String(payload?.phone ?? "").trim();
-  if (!phone) return json(400, { error: "missing phone" });
-
-  // Stamp phone_lookup on this subscriber (ManyChat never sets it on its own
-  // auto-created WhatsApp subs). Runs on every conversation-start, so every
-  // subscriber becomes findable by phone — closes the "exists but unresolvable"
-  // gap. Non-fatal: a failure here must not break the greet branch.
-  const subscriberId = String(payload?.subscriber_id ?? "").trim();
-  if (subscriberId) {
-    try {
-      await stampPhoneLookup(subscriberId, phone);
-    } catch (err) {
-      console.error("stampPhoneLookup failed (non-fatal):", (err as Error).message);
-    }
-  }
-
-  const existing = await lookupContactByPhone(phone);
-  if (existing) {
-    return json(200, {
-      exists: true,
-      contact_id: existing.contactId,
-    });
-  }
-
-  return json(200, { exists: false });
-}
-
-// ─── Action: create ───────────────────────────────────────────────────────
-// Called by ManyChat AFTER it's collected the user's name in the flow.
-// Forwards to the canonical `lead-intake` Trigger.dev task, which handles:
-//   - Hebrew → English name transliteration (via Claude Haiku)
-//   - Contact upsert with 3-tier dedup (phone, email, fuzzy phone)
-//   - upsertLead: 1 Contact = 1 Lead, with re-engagement updates in place
-//   - Meta CAPI Lead event firing
-//   - ManyChat subscriber upsert
-//   - Audit notes on the Lead
-//
-// Source detection: if the user's first message starts with "Hi De Club!"
-// (the prefilled text on every wa.me link on declub.co.il), we tag the
-// Lead as Source=Website. Otherwise Source=Manychat (channel of contact).
-//
-// Body: { phone, first_name, last_name?, last_input? }
-// Returns: { ok: true, queued: true, source } — no contact_id (async). If
-// ManyChat needs the contact_id, call action=greet on the next interaction.
-async function handleCreate(payload: any): Promise<NetlifyResponse> {
-  const phone = String(payload?.phone ?? "").trim();
-  const firstName = String(payload?.first_name ?? "").trim();
-  const lastName = String(payload?.last_name ?? "").trim();
-
-  if (!phone) return json(400, { error: "missing phone" });
-  if (!firstName) return json(400, { error: "missing first_name" });
-
-  const triggerKey = process.env.TRIGGER_PROD_SECRET_KEY;
-  if (!triggerKey) return json(500, { error: "TRIGGER_PROD_SECRET_KEY missing" });
-
-  // Source attribution from the prefilled wa.me marker (see header comment).
-  const lastInput = String(payload?.last_input ?? "").trim().toLowerCase();
-  const cameFromWebsite = lastInput.startsWith(WEBSITE_WA_PREFILL_PREFIX);
-
-  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
-
-  // Forward to Trigger.dev lead-intake. Fire-and-wait: we wait for the
-  // task to be queued (HTTP 200 from Trigger.dev) but NOT for the run to
-  // complete (Trigger.dev's trigger API is async by design).
-  const res = await fetch(
-    "https://api.trigger.dev/api/v1/tasks/lead-intake/trigger",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${triggerKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        payload: {
-          name: fullName,
-          phone,
-          source_override: cameFromWebsite ? "Website" : "Manychat",
-          type_override: "Organic",
-          source: "manychat-wa-inbound",
-          notes: lastInput ? `Initial WA message: "${lastInput.slice(0, 500)}"` : undefined,
-        },
-      }),
-    }
-  );
-
-  if (!res.ok) {
-    const text = await res.text();
-    return json(502, {
-      error: "trigger.dev rejected",
-      status: res.status,
-      detail: text.slice(0, 500),
-    });
-  }
-
-  const data = (await res.json()) as { id?: string };
-  return json(200, {
-    ok: true,
-    queued: true,
-    run_id: data.id ?? null,
-    source: cameFromWebsite ? "Website" : "Manychat",
-  });
+// ─── Actions: greet / create (retired 2026-07-01, superseded by capture) ───
+// Kept as explicit 410s so a forgotten ManyChat branch fails loudly instead of
+// writing to the retired Monday boards. Old code: _archive/netlify-functions.
+async function handleRetired(action: string): Promise<NetlifyResponse> {
+  console.error(`manychat-crm action=${action} is retired; use capture`);
+  return json(410, { error: `action '${action}' is retired, use 'capture'` });
 }
 
 // ─── Action: update_name ──────────────────────────────────────────────────
 // Body: { contact_id, first_name, last_name }
-// Renames the Contact + every linked Lead so sales sees the real name
-// instead of the placeholder created during the greet step.
+// contact_id is the Arbox user id for everyone captured since 2026-09-22.
+// Subscribers captured earlier hold a Monday item id (10 digits); those were
+// renamed on Monday already and are skipped here.
 async function handleUpdateName(payload: any): Promise<NetlifyResponse> {
   const contactId = String(payload?.contact_id ?? "").trim();
   const firstName = String(payload?.first_name ?? "").trim();
@@ -762,29 +310,16 @@ async function handleUpdateName(payload: any): Promise<NetlifyResponse> {
   if (!contactId || !firstName) {
     return json(400, { error: "missing contact_id or first_name" });
   }
-
-  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
-
-  await renameItem(contactId, CONTACTS_BOARD_ID, fullName);
-
-  const leadIds = await fetchLinkedLeadIds(contactId);
-  for (const leadId of leadIds) {
-    try {
-      await renameItem(leadId, LEADS_BOARD_ID, fullName);
-    } catch {
-      // non-fatal — Contact rename is the primary effect; nightly
-      // crm-cleanup will reconcile any lingering name drift.
-    }
+  const userId = Number(contactId);
+  if (!Number.isFinite(userId) || userId <= 0 || userId > 1_000_000_000) {
+    return json(200, { ok: true, contact_id: contactId, renamed_leads: 0, skipped: "not an Arbox id" });
   }
-
-  await fireArboxTask({
-    action: "rename",
-    contact_id: contactId,
+  await arbox("PATCH", "/v3/users", {
+    user_id: userId,
     first_name: firstName,
-    last_name: lastName,
+    ...(lastName ? { last_name: lastName } : {}),
   });
-
-  return json(200, { ok: true, contact_id: contactId, renamed_leads: leadIds.length });
+  return json(200, { ok: true, contact_id: contactId, renamed_leads: 1 });
 }
 
 export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
@@ -817,8 +352,7 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
   );
   try {
     if (action === "capture") return await handleCapture(payload);
-    if (action === "greet") return await handleGreet(payload);
-    if (action === "create") return await handleCreate(payload);
+    if (action === "greet" || action === "create") return await handleRetired(action);
     if (action === "update_name") return await handleUpdateName(payload);
     return json(400, { error: `unknown action '${action}', expected 'capture', 'greet', 'create', or 'update_name'` });
   } catch (err) {
