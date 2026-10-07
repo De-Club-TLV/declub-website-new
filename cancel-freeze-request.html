@@ -14,7 +14,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Heebo:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Heebo:wght@200;300;400;500&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="pages.css">
     <link rel="shortcut icon" href="assets/images/logos/favicon.png" type="image/png">
@@ -27,97 +27,117 @@
     })(window,document,'script','dataLayer','GTM-KC45WQ5M');</script>
     <!-- End Google Tag Manager -->
     <style>
-        /* Cancel / Freeze request page (page-scoped) */
-        .cfr-hero { padding: 180px 0 48px; text-align: center; }
-        .cfr-tag { display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-sage); margin-bottom: 18px; }
-        .cfr-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; color: var(--color-cream); }
-        .cfr-sub { margin-top: 14px; font-family: 'Heebo', var(--font-body); font-size: 1.05rem; font-weight: 300; color: var(--color-text-muted); }
+        /* Cancel / freeze request (page-scoped) */
+        .cf { --line: rgba(245, 240, 232, 0.12); --line-strong: rgba(245, 240, 232, 0.28); --err: #e2867e; font-family: 'Heebo', var(--font-body); color: var(--color-cream); padding: 168px 0 140px; }
+        .cf-wrap { width: min(620px, 100% - 40px); margin: 0 auto; }
+        .cf-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-        .cfr-body { padding: 0 0 140px; font-family: 'Heebo', var(--font-body); }
-        .cfr-card { max-width: 680px; margin: 0 auto; padding: 44px; background: var(--color-surface); border: 1px solid rgba(245, 240, 232, 0.06); border-radius: 32px; }
+        .cf-head { margin-bottom: 56px; }
+        .cf-title { font-size: clamp(2.6rem, 8vw, 4.6rem); font-weight: 200; line-height: 1.02; letter-spacing: -0.01em; color: var(--color-cream); margin-bottom: 28px; }
+        .cf-lede { max-width: 34em; font-size: 1.06rem; font-weight: 300; line-height: 1.75; color: var(--color-text-muted); margin-bottom: 22px; }
+        .cf-wa { display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; color: var(--color-sage); padding-bottom: 3px; border-bottom: 1px solid rgba(209, 220, 189, 0.35); transition: border-color 0.2s ease, color 0.2s ease; }
+        .cf-wa svg { width: 18px; height: 18px; fill: currentColor; }
+        .cf-wa:hover { color: var(--color-cream); border-color: var(--color-cream); }
 
-        .cfr-intro { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding-bottom: 32px; margin-bottom: 32px; border-bottom: 1px solid rgba(245, 240, 232, 0.08); }
-        .cfr-intro p { color: var(--color-cream); font-size: 1rem; font-weight: 300; line-height: 1.7; }
-        .cfr-talk { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 999px; border: 1px solid rgba(37, 211, 102, 0.3); background: rgba(37, 211, 102, 0.08); color: #25d366; font-size: 0.85rem; font-weight: 500; transition: transform 100ms ease-out, background 0.2s ease; }
-        .cfr-talk:hover { background: rgba(37, 211, 102, 0.14); }
-        .cfr-talk:active { transform: scale(0.97); }
+        /* The choice: two tiles that are the first field */
+        .cf-choice { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .cf-choice input { position: absolute; opacity: 0; pointer-events: none; }
+        .cf-tile { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; min-height: 220px; padding: 26px 26px 24px; border: 1px solid var(--line); border-radius: 28px; cursor: pointer; user-select: none; overflow: hidden; transition: border-color 0.25s ease, background-color 0.35s ease, color 0.35s ease, transform 120ms ease-out, opacity 0.3s ease; }
+        .cf-tile:hover { border-color: var(--line-strong); }
+        .cf-tile:active { transform: scale(0.985); }
+        .cf-tile-word { font-size: clamp(2.2rem, 6vw, 3.3rem); font-weight: 200; line-height: 1; }
+        .cf-tile-note { font-size: 0.9rem; font-weight: 300; line-height: 1.5; color: var(--color-text-muted); transition: color 0.35s ease; }
+        .cf-tile--freeze::after { content: ''; position: absolute; inset: auto -30% -60% auto; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(209, 220, 189, 0.16), transparent 70%); pointer-events: none; }
+        .cf-choice input:focus-visible + .cf-tile { outline: 2px solid var(--color-sage); outline-offset: 3px; }
+        #rtFreeze:checked + .cf-tile { background: var(--color-sage); border-color: var(--color-sage); color: var(--color-bg); }
+        #rtFreeze:checked + .cf-tile .cf-tile-note { color: rgba(0, 0, 0, 0.62); }
+        #rtCancel:checked + .cf-tile { background: var(--color-cream); border-color: var(--color-cream); color: var(--color-bg); }
+        #rtCancel:checked + .cf-tile .cf-tile-note { color: rgba(0, 0, 0, 0.6); }
+        .cf-choice.has-choice input:not(:checked) + .cf-tile { opacity: 0.55; }
+        .cf-choice.has-choice input:not(:checked) + .cf-tile:hover { opacity: 0.85; }
 
-        .cfr-form { display: flex; flex-direction: column; gap: 26px; }
-        .cfr-group { border: 0; padding: 0; margin: 0; min-width: 0; }
-        .cfr-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .cfr-field { display: flex; flex-direction: column; min-width: 0; }
-        .cfr-label { display: block; margin-bottom: 10px; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.01em; color: var(--color-cream); }
-        .cfr-optional { font-weight: 300; color: var(--color-text-muted); margin-inline-start: 6px; }
+        /* Rest of form reveals after the choice */
+        .cf-rest { padding-top: 12px; }
+        .cf-rest.is-in { animation: cfRise 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+        @keyframes cfRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-        .cfr-input { width: 100%; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; color: var(--color-cream); font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
-        .cfr-input:focus { border-color: var(--color-sage); background: rgba(255, 255, 255, 0.06); box-shadow: 0 0 0 4px rgba(209, 220, 189, 0.1); }
-        .cfr-input[dir="ltr"] { text-align: right; }
-        .cfr-input[type="date"] { color-scheme: dark; min-height: 52px; }
-        .cfr-select { appearance: none; -webkit-appearance: none; color-scheme: dark; cursor: pointer; padding-inline-start: 18px; padding-inline-end: 44px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23b0aba3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 18px center; }
-        .cfr-textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+        .cf-step { padding: 44px 0 0; }
+        .cf-step-title { display: flex; align-items: baseline; gap: 14px; font-size: 1.35rem; font-weight: 400; color: var(--color-cream); margin-bottom: 22px; }
+        .cf-step-n { font-size: 0.95rem; font-weight: 400; color: var(--color-sage); min-width: 1ch; }
+        .cf.is-cancel .cf-freeze-only { display: none; }
 
-        /* Segmented control */
-        .cfr-segment { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; }
-        .cfr-segment input { position: absolute; opacity: 0; pointer-events: none; }
-        .cfr-segment label { position: relative; z-index: 1; padding: 13px 10px; text-align: center; font-size: 0.95rem; font-weight: 500; color: var(--color-text-muted); border-radius: 12px; cursor: pointer; user-select: none; transition: color 0.25s ease, transform 100ms ease-out; }
-        .cfr-segment label:active { transform: scale(0.97); }
-        .cfr-segment input:checked + label { color: var(--color-bg); }
-        .cfr-segment input:focus-visible + label { outline: 2px solid var(--color-sage); outline-offset: 2px; }
-        .cfr-segment-thumb { position: absolute; top: 4px; bottom: 4px; right: 4px; width: calc(50% - 4px); background: var(--color-sage); border-radius: 12px; opacity: 0; transform: translateX(0); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease; }
-        .cfr-segment.has-value .cfr-segment-thumb { opacity: 1; }
-        .cfr-segment.is-cancel .cfr-segment-thumb { transform: translateX(-100%); }
+        .cf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+        .cf-f { display: flex; flex-direction: column; min-width: 0; }
+        .cf-f label { font-size: 0.85rem; font-weight: 400; color: var(--color-text-muted); margin-bottom: 8px; }
+        .cf-opt { color: rgba(176, 171, 163, 0.6); margin-inline-start: 4px; }
+        .cf-f input, .cf-f textarea { width: 100%; padding: 15px 18px; background: rgba(245, 240, 232, 0.035); border: 1px solid var(--line); border-radius: 16px; color: var(--color-cream); font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.2s ease, background 0.2s ease; }
+        .cf-f input::placeholder { color: rgba(176, 171, 163, 0.4); }
+        .cf-f input[dir="ltr"] { text-align: right; }
+        .cf-f input:focus, .cf-f textarea:focus { border-color: var(--color-sage); background: rgba(245, 240, 232, 0.06); }
+        .cf-f input[type="date"] { color-scheme: dark; min-height: 54px; }
+        .cf-f textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+        .cf-f--date { max-width: 300px; margin-bottom: 18px; }
+        .cf-f--notes { margin-top: 26px; }
 
-        /* Reason chips */
-        .cfr-chips { display: flex; flex-wrap: wrap; gap: 10px; }
-        .cfr-chips input { position: absolute; opacity: 0; pointer-events: none; }
-        .cfr-chips label { padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.03); color: var(--color-cream); font-size: 0.88rem; font-weight: 400; cursor: pointer; user-select: none; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 100ms ease-out; }
-        .cfr-chips label:hover { border-color: rgba(209, 220, 189, 0.4); }
-        .cfr-chips label:active { transform: scale(0.96); }
-        .cfr-chips input:checked + label { background: var(--color-sage); border-color: var(--color-sage); color: var(--color-bg); font-weight: 500; }
-        .cfr-chips input:focus-visible + label { outline: 2px solid var(--color-sage); outline-offset: 2px; }
+        /* Freeze length: a segmented track */
+        .cf-len { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 18px; padding: 4px; gap: 4px; }
+        .cf-len input, .cf-reasons input { position: absolute; opacity: 0; pointer-events: none; }
+        .cf-len label { text-align: center; padding: 13px 6px; border-radius: 14px; font-size: 0.95rem; color: var(--color-text-muted); cursor: pointer; user-select: none; transition: background 0.25s ease, color 0.25s ease, transform 120ms ease-out; }
+        .cf-len label:hover { color: var(--color-cream); }
+        .cf-len label:active { transform: scale(0.96); }
+        .cf-len input:checked + label { background: var(--color-sage); color: var(--color-bg); font-weight: 500; }
+        .cf-len input:focus-visible + label, .cf-reasons input:focus-visible + label { outline: 2px solid var(--color-sage); outline-offset: 2px; }
+        .cf-return { min-height: 1.6em; margin-top: 16px; font-size: 1.05rem; font-weight: 300; color: var(--color-cream); }
+        .cf-return strong { font-weight: 500; color: var(--color-sage); }
 
-        /* Freeze fields reveal */
-        .cfr-reveal { display: grid; grid-template-rows: 0fr; opacity: 0; margin-top: -26px; transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, margin-top 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
-        .cfr-reveal > * { overflow: hidden; min-height: 0; }
-        .cfr-reveal.is-open { grid-template-rows: 1fr; opacity: 1; margin-top: 0; }
-        .cfr-reveal[hidden] { display: none; }
+        .cf-reasons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .cf-reasons label { padding: 10px 16px; border: 1px solid var(--line); border-radius: 999px; font-size: 0.92rem; color: var(--color-cream); cursor: pointer; user-select: none; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 120ms ease-out; }
+        .cf-reasons label:hover { border-color: var(--line-strong); }
+        .cf-reasons label:active { transform: scale(0.96); }
+        .cf-reasons input:checked + label { background: var(--color-cream); border-color: var(--color-cream); color: var(--color-bg); }
 
-        .cfr-consents { display: flex; flex-direction: column; gap: 12px; }
-        .cfr-consent { margin: 0; font-family: inherit; font-size: 0.82rem; }
-        .cfr-consent input[type="checkbox"] { margin-top: 3px; }
-        .cfr-consent a { color: var(--color-sage); text-decoration: underline; text-underline-offset: 3px; }
+        .cf-consents { display: flex; flex-direction: column; gap: 14px; padding-top: 40px; }
+        .cf-check { display: flex; align-items: flex-start; gap: 12px; font-size: 0.88rem; font-weight: 300; line-height: 1.55; color: var(--color-text-muted); cursor: pointer; }
+        .cf-check input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border: 1px solid var(--line-strong); border-radius: 6px; background: transparent; cursor: pointer; position: relative; transition: background 0.2s ease, border-color 0.2s ease; }
+        .cf-check input:checked { background: var(--color-sage); border-color: var(--color-sage); }
+        .cf-check input:checked::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--color-bg); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .cf-check input:focus-visible { outline: 2px solid var(--color-sage); outline-offset: 2px; }
+        .cf-check a { color: var(--color-cream); text-decoration: underline; text-underline-offset: 3px; }
 
-        .cfr-error { display: none; margin-top: 8px; font-size: 0.78rem; color: #e2726e; }
-        .is-invalid .cfr-error, .cfr-error.is-shown { display: block; }
-        .is-invalid .cfr-input { border-color: #e2726e; box-shadow: 0 0 0 3px rgba(226, 114, 110, 0.15); }
-        .is-invalid .cfr-segment, .is-invalid .cfr-chips label { border-color: rgba(226, 114, 110, 0.6); }
+        .cf-submit { width: 100%; margin-top: 34px; padding: 19px; border: 0; border-radius: 18px; background: var(--color-sage); color: var(--color-bg); font-family: inherit; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: background 0.2s ease, transform 120ms ease-out; }
+        .cf.is-cancel .cf-submit { background: var(--color-cream); }
+        .cf-submit:hover { background: var(--color-green); }
+        .cf.is-cancel .cf-submit:hover { background: #fff; }
+        .cf-submit:active { transform: scale(0.985); }
+        .cf-submit:focus-visible { outline: 2px solid var(--color-cream); outline-offset: 3px; }
+        .cf-fine { margin-top: 14px; font-size: 0.85rem; font-weight: 300; color: var(--color-text-muted); text-align: center; }
 
-        .cfr-submit { position: relative; width: 100%; padding: 18px; margin-top: 4px; background: var(--color-sage); color: var(--color-bg); border: none; border-radius: 14px; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s ease, transform 100ms ease-out, opacity 0.2s ease; }
-        .cfr-submit:hover { background: var(--color-green); }
-        .cfr-submit:active { transform: scale(0.98); }
-        .cfr-submit[disabled] { opacity: 0.6; cursor: default; }
-        .cfr-note { text-align: center; font-size: 0.78rem; font-weight: 300; color: var(--color-text-muted); margin-top: -12px; }
+        .cf-err { display: none; margin-top: 8px; font-size: 0.82rem; color: var(--err); }
+        .is-bad > .cf-err, .cf-err.is-on { display: block; }
+        .is-bad > input, .is-bad > textarea { border-color: var(--err); }
+        .cf-len.is-bad, .cf-choice.is-bad .cf-tile { border-color: var(--err); }
+        .cf-check.is-bad input { border-color: var(--err); }
 
-        .cfr-success { text-align: center; padding: 24px 0 8px; outline: none; animation: cfrIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-        .cfr-success-icon { width: 64px; height: 64px; margin: 0 auto 22px; border-radius: 50%; background: rgba(209, 220, 189, 0.12); display: flex; align-items: center; justify-content: center; }
-        .cfr-success-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--color-sage); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-        .cfr-success h2 { font-size: 1.8rem; font-weight: 400; color: var(--color-cream); margin-bottom: 10px; }
-        .cfr-success p { color: var(--color-text-muted); font-weight: 300; line-height: 1.7; margin-bottom: 28px; }
-        .cfr-back { display: inline-block; padding: 12px 24px; border-radius: 999px; border: 1px solid rgba(245, 240, 232, 0.2); color: var(--color-cream); font-size: 0.9rem; transition: border-color 0.2s ease, transform 100ms ease-out; }
-        .cfr-back:hover { border-color: var(--color-sage); }
-        .cfr-back:active { transform: scale(0.97); }
-        @keyframes cfrIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        .cf-done { padding-top: 8px; outline: none; animation: cfRise 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+        .cf-done-title { font-size: clamp(2rem, 6vw, 3rem); font-weight: 200; line-height: 1.1; margin-bottom: 16px; }
+        .cf-done-text { font-size: 1.06rem; font-weight: 300; line-height: 1.75; color: var(--color-text-muted); margin-bottom: 32px; max-width: 32em; }
+        .cf-home { display: inline-block; padding: 13px 26px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--color-cream); transition: border-color 0.2s ease, transform 120ms ease-out; }
+        .cf-home:hover { border-color: var(--color-sage); }
+        .cf-home:active { transform: scale(0.97); }
 
         /* Honeypot: sr-only clip pattern, never off-screen positioning */
-        .cfr-hp { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .cf-hp { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-        @media (max-width: 640px) {
-            .cfr-hero { padding: 140px 0 36px; }
-            .cfr-card { padding: 28px 20px; border-radius: 24px; }
-            .cfr-row { grid-template-columns: 1fr; }
+        @media (max-width: 600px) {
+            .cf { padding: 130px 0 100px; }
+            .cf-tile { min-height: 168px; padding: 20px 18px; border-radius: 22px; gap: 24px; }
+            .cf-grid { grid-template-columns: 1fr; }
+            .cf-len { grid-template-columns: 1fr 1fr; }
+            .cf-f--date { max-width: none; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .cfr-segment-thumb, .cfr-reveal, .cfr-success { transition: opacity 0.2s ease; animation: none; }
+            .cf-rest.is-in, .cf-done { animation: none; }
+            .cf-tile, .cf-len label, .cf-reasons label { transition: none; }
         }
     </style>
 </head>
@@ -163,93 +183,63 @@
         </div>
     </div>
 
-    <!-- Cancel / Freeze Hero -->
-    <section class="cfr-hero">
-        <div class="container">
-            <span class="cfr-tag">Membership</span>
-            <h1 class="cfr-title">Cancel or Freeze</h1>
-            <p class="cfr-sub" dir="rtl" lang="he">בקשת ביטול או הקפאת מנוי</p>
-        </div>
-    </section>
+    <main class="cf" dir="rtl" lang="he">
+        <div class="cf-wrap">
+            <header class="cf-head">
+                <h1 class="cf-title">לעצור לרגע,<br>או להיפרד?</h1>
+                <p class="cf-lede">אפשר להקפיא את המנוי לתקופה ולחזור בדיוק מאיפה שעצרתם, או לבקש ביטול. אם משהו לא עובד לכם, ספרו לנו קודם. לפעמים שיחה קצרה פותרת הכל.</p>
+                <a class="cf-wa" href="https://wa.me/15512399833?text=Hi%20De%20Club!" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.91-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.08-.13-.27-.2-.57-.35M12.05 21.79h0a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 01-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 012.89 7c0 5.45-4.44 9.88-9.89 9.88M20.46 3.49A11.82 11.82 0 0012.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 005.68 1.45h0c6.56 0 11.89-5.34 11.9-11.9 0-3.18-1.24-6.17-3.48-8.41z"/></svg>
+                    לדבר איתנו בוואטסאפ
+                </a>
+            </header>
 
-    <!-- Cancel / Freeze Form -->
-    <section class="cfr-body" dir="rtl" lang="he">
-        <div class="container">
-            <div class="cfr-card" id="cfrCard">
-                <div class="cfr-intro">
-                    <p>לפני שממשיכים, חשוב לנו שתדעו שאנחנו כאן לכל שאלה או התלבטות. לפעמים שיחה קצרה פותרת הכל.</p>
-                    <a href="https://wa.me/15512399833?text=Hi%20De%20Club!" target="_blank" rel="noopener" class="cfr-talk">דברו איתנו בוואטסאפ</a>
-                </div>
+            <form class="cf-form" id="cfForm" novalidate>
+                <div class="cf-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label></div>
 
-                <form class="cfr-form" id="cfrForm" novalidate>
-                    <div class="cfr-hp" aria-hidden="true">
-                        <label>Leave this empty <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label>
-                    </div>
+                <fieldset class="cf-choice" id="cfChoice">
+                    <legend class="cf-sr">מה תרצו לעשות?</legend>
+                    <input type="radio" name="request_type" id="rtFreeze" value="freeze">
+                    <label for="rtFreeze" class="cf-tile cf-tile--freeze">
+                        <span class="cf-tile-word">להקפיא</span>
+                        <span class="cf-tile-note">הפסקה זמנית. המנוי מחכה לכם.</span>
+                    </label>
+                    <input type="radio" name="request_type" id="rtCancel" value="cancel">
+                    <label for="rtCancel" class="cf-tile cf-tile--cancel">
+                        <span class="cf-tile-word">לבטל</span>
+                        <span class="cf-tile-note">סיום המנוי בהתאם לתנאי ההתקשרות.</span>
+                    </label>
+                </fieldset>
+                <p class="cf-err" data-for="request_type">בחרו הקפאה או ביטול כדי להמשיך</p>
 
-                    <fieldset class="cfr-group">
-                        <legend class="cfr-label">סוג הבקשה</legend>
-                        <div class="cfr-segment" role="radiogroup">
-                            <input type="radio" name="request_type" id="rtFreeze" value="freeze" required>
-                            <label for="rtFreeze">הקפאה</label>
-                            <input type="radio" name="request_type" id="rtCancel" value="cancel">
-                            <label for="rtCancel">ביטול</label>
-                            <span class="cfr-segment-thumb" aria-hidden="true"></span>
+                <div class="cf-rest" id="cfRest" hidden>
+                    <section class="cf-step">
+                        <h2 class="cf-step-title"><span class="cf-step-n">1</span>הפרטים שלכם</h2>
+                        <div class="cf-grid">
+                            <div class="cf-f"><label for="fFirst">שם פרטי</label><input id="fFirst" name="first_name" type="text" autocomplete="given-name"><p class="cf-err" data-for="first_name">הזינו שם פרטי</p></div>
+                            <div class="cf-f"><label for="fLast">שם משפחה</label><input id="fLast" name="last_name" type="text" autocomplete="family-name"><p class="cf-err" data-for="last_name">הזינו שם משפחה</p></div>
+                            <div class="cf-f"><label for="fPhone">טלפון</label><input id="fPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="050-0000000"><p class="cf-err" data-for="phone">הזינו מספר טלפון מלא</p></div>
+                            <div class="cf-f"><label for="fEmail">אימייל</label><input id="fEmail" name="email" type="email" autocomplete="email" dir="ltr" placeholder="name@email.com"><p class="cf-err" data-for="email">הזינו כתובת אימייל תקינה</p></div>
                         </div>
-                        <p class="cfr-error" data-for="request_type">בחרו את סוג הבקשה</p>
-                    </fieldset>
+                    </section>
 
-                    <div class="cfr-row">
-                        <div class="cfr-field">
-                            <label class="cfr-label" for="fFirst">שם פרטי</label>
-                            <input class="cfr-input" id="fFirst" name="first_name" type="text" autocomplete="given-name" required>
-                            <p class="cfr-error" data-for="first_name">שדה חובה</p>
+                    <section class="cf-step cf-freeze-only" id="cfWhen">
+                        <h2 class="cf-step-title"><span class="cf-step-n">2</span>מתי ולכמה זמן</h2>
+                        <div class="cf-f cf-f--date"><label for="fStart">תאריך תחילת ההקפאה</label><input id="fStart" name="freeze_start" type="date" dir="ltr"><p class="cf-err" data-for="freeze_start">בחרו תאריך התחלה</p></div>
+                        <div class="cf-len" role="radiogroup" aria-label="משך ההקפאה">
+                            <input type="radio" name="freeze_length" id="l1" value="14d"><label for="l1">שבועיים</label>
+                            <input type="radio" name="freeze_length" id="l2" value="1m"><label for="l2">חודש</label>
+                            <input type="radio" name="freeze_length" id="l3" value="2m"><label for="l3">חודשיים</label>
+                            <input type="radio" name="freeze_length" id="l4" value="3m"><label for="l4">3 חודשים</label>
                         </div>
-                        <div class="cfr-field">
-                            <label class="cfr-label" for="fLast">שם משפחה</label>
-                            <input class="cfr-input" id="fLast" name="last_name" type="text" autocomplete="family-name" required>
-                            <p class="cfr-error" data-for="last_name">שדה חובה</p>
-                        </div>
-                    </div>
+                        <p class="cf-err" data-for="freeze_length">בחרו את משך ההקפאה</p>
+                        <p class="cf-return" id="cfReturn" aria-live="polite"></p>
+                    </section>
 
-                    <div class="cfr-row">
-                        <div class="cfr-field">
-                            <label class="cfr-label" for="fPhone">טלפון</label>
-                            <input class="cfr-input" id="fPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required>
-                            <p class="cfr-error" data-for="phone">מספר טלפון לא תקין</p>
-                        </div>
-                        <div class="cfr-field">
-                            <label class="cfr-label" for="fEmail">אימייל</label>
-                            <input class="cfr-input" id="fEmail" name="email" type="email" autocomplete="email" dir="ltr" required>
-                            <p class="cfr-error" data-for="email">כתובת אימייל לא תקינה</p>
-                        </div>
-                    </div>
-
-                    <div class="cfr-reveal" id="freezeFields" hidden>
-                        <div class="cfr-row">
-                            <div class="cfr-field">
-                                <label class="cfr-label" for="fStart">מתאריך</label>
-                                <input class="cfr-input" id="fStart" name="freeze_start" type="date" dir="ltr">
-                                <p class="cfr-error" data-for="freeze_start">בחרו תאריך התחלה</p>
-                            </div>
-                            <div class="cfr-field">
-                                <label class="cfr-label" for="fLength">לכמה זמן</label>
-                                <select class="cfr-input cfr-select" id="fLength" name="freeze_length">
-                                    <option value="" selected disabled>בחרו</option>
-                                    <option value="2w">שבועיים</option>
-                                    <option value="1m">חודש</option>
-                                    <option value="2m">חודשיים</option>
-                                    <option value="3m">3 חודשים</option>
-                                    <option value="other">אחר</option>
-                                </select>
-                                <p class="cfr-error" data-for="freeze_length">בחרו משך הקפאה</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <fieldset class="cfr-group">
-                        <legend class="cfr-label">סיבת הבקשה</legend>
-                        <div class="cfr-chips">
-                            <input type="radio" name="reason" id="r1" value="schedule" required><label for="r1">שינוי בלוח הזמנים</label>
+                    <section class="cf-step">
+                        <h2 class="cf-step-title"><span class="cf-step-n" id="cfReasonN">3</span>מה הסיבה?</h2>
+                        <div class="cf-reasons">
+                            <input type="radio" name="reason" id="r1" value="schedule"><label for="r1">שינוי בלוח הזמנים</label>
                             <input type="radio" name="reason" id="r2" value="travel"><label for="r2">חופשה או נסיעה</label>
                             <input type="radio" name="reason" id="r3" value="medical"><label for="r3">סיבה רפואית</label>
                             <input type="radio" name="reason" id="r4" value="pregnancy"><label for="r4">הריון</label>
@@ -259,33 +249,28 @@
                             <input type="radio" name="reason" id="r8" value="financial"><label for="r8">שיקולים כלכליים</label>
                             <input type="radio" name="reason" id="r9" value="other"><label for="r9">אחר</label>
                         </div>
-                        <p class="cfr-error" data-for="reason">בחרו סיבה</p>
-                    </fieldset>
+                        <p class="cf-err" data-for="reason">בחרו סיבה</p>
+                        <div class="cf-f cf-f--notes"><label for="fNotes">משהו שחשוב לנו לדעת? <span class="cf-opt">לא חובה</span></label><textarea id="fNotes" name="notes" rows="3" maxlength="1000"></textarea></div>
+                    </section>
 
-                    <div class="cfr-field">
-                        <label class="cfr-label" for="fNotes">רוצים להוסיף משהו? <span class="cfr-optional">לא חובה</span></label>
-                        <textarea class="cfr-input cfr-textarea" id="fNotes" name="notes" rows="4" maxlength="1000"></textarea>
+                    <div class="cf-consents">
+                        <label class="cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה שצוות De Club ייצור איתי קשר בטלפון, בוואטסאפ או במייל לגבי הבקשה.</span></label>
+                        <label class="cf-check"><input type="checkbox" name="consent_privacy" value="yes"><span>קראתי ואני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ואת <a href="terms.html" target="_blank">תנאי השימוש</a>.</span></label>
+                        <p class="cf-err" data-for="consents">כדי לשלוח, אשרו את שני הסעיפים</p>
                     </div>
 
-                    <div class="cfr-consents">
-                        <label class="modal-consent cfr-consent"><input type="checkbox" name="consent_contact" value="yes" required> אני מסכימ/ה שצוות De Club ייצור איתי קשר בטלפון, וואטסאפ או אימייל לגבי הבקשה.</label>
-                        <label class="modal-consent cfr-consent"><input type="checkbox" name="consent_privacy" value="yes" required> קראתי ואני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ואת <a href="terms.html" target="_blank">תנאי השימוש</a>.</label>
-                        <p class="cfr-error" data-for="consents">יש לאשר את שני הסעיפים</p>
-                    </div>
-
-                    <button type="submit" class="cfr-submit" id="cfrSubmit"><span class="cfr-submit-label">שליחת הבקשה</span></button>
-                    <p class="cfr-note">הבקשה תיכנס לתוקף רק לאחר אישור מהצוות.</p>
-                </form>
-
-                <div class="cfr-success" id="cfrSuccess" hidden tabindex="-1">
-                    <div class="cfr-success-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
-                    <h2>הבקשה התקבלה</h2>
-                    <p>צוות De Club ייצור איתך קשר תוך 3 ימי עסקים להשלמת הבקשה.</p>
-                    <a href="index.html" class="cfr-back">חזרה לאתר</a>
+                    <button type="submit" class="cf-submit" id="cfSubmit">שליחת הבקשה</button>
+                    <p class="cf-fine">הבקשה נכנסת לתוקף רק אחרי אישור של הצוות. נחזור אליכם תוך 3 ימי עסקים.</p>
                 </div>
+            </form>
+
+            <div class="cf-done" id="cfDone" hidden tabindex="-1">
+                <h2 class="cf-done-title" id="cfDoneTitle">הבקשה התקבלה</h2>
+                <p class="cf-done-text" id="cfDoneText">צוות De Club יחזור אליכם תוך 3 ימי עסקים כדי להשלים אותה.</p>
+                <a href="index.html" class="cf-home">חזרה לאתר</a>
             </div>
         </div>
-    </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -304,12 +289,15 @@
     <script src="pages.js"></script>
     <script>
     (function () {
-        var form = document.getElementById('cfrForm');
-        var segment = form.querySelector('.cfr-segment');
-        var freeze = document.getElementById('freezeFields');
-        var success = document.getElementById('cfrSuccess');
-        var submit = document.getElementById('cfrSubmit');
+        var root = document.querySelector('.cf');
+        var form = document.getElementById('cfForm');
+        var choice = document.getElementById('cfChoice');
+        var rest = document.getElementById('cfRest');
+        var submit = document.getElementById('cfSubmit');
+        var ret = document.getElementById('cfReturn');
+        var start = document.getElementById('fStart');
         var touched = false;
+        var fmt = new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long' });
 
         function val(name) {
             var el = form.elements[name];
@@ -319,60 +307,68 @@
         }
         function isFreeze() { return val('request_type') === 'freeze'; }
 
-        function setFreeze(open) {
-            if (open) {
-                freeze.hidden = false;
-                requestAnimationFrame(function () { freeze.classList.add('is-open'); });
-            } else {
-                freeze.classList.remove('is-open');
-                setTimeout(function () { if (!freeze.classList.contains('is-open')) freeze.hidden = true; }, 450);
-            }
+        start.min = new Date().toISOString().slice(0, 10);
+
+        function updateReturn() {
+            var s = val('freeze_start'), len = val('freeze_length');
+            if (!s || !len) { ret.textContent = ''; return; }
+            var d = new Date(s + 'T12:00:00');
+            if (len === '14d') d.setDate(d.getDate() + 14);
+            else d.setMonth(d.getMonth() + parseInt(len, 10));
+            ret.innerHTML = 'נתראה שוב ב-<strong>' + fmt.format(d) + '</strong>';
         }
 
-        form.querySelectorAll('input[name="request_type"]').forEach(function (r) {
-            r.addEventListener('change', function () {
-                segment.classList.add('has-value');
-                segment.classList.toggle('is-cancel', r.value === 'cancel' && r.checked);
-                setFreeze(isFreeze());
-                if (touched) validate();
-            });
+        choice.addEventListener('change', function () {
+            var freeze = isFreeze();
+            choice.classList.add('has-choice');
+            root.classList.toggle('is-cancel', !freeze);
+            document.getElementById('cfReasonN').textContent = freeze ? '3' : '2';
+            submit.textContent = freeze ? 'שליחת בקשת הקפאה' : 'שליחת בקשת ביטול';
+            if (rest.hidden) {
+                rest.hidden = false;
+                rest.classList.add('is-in');
+                setTimeout(function () { document.getElementById('fFirst').focus({ preventScroll: true }); rest.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120);
+            }
+            if (touched) validate();
         });
+        form.addEventListener('change', function (e) {
+            if (e.target.name === 'freeze_start' || e.target.name === 'freeze_length') updateReturn();
+            if (touched) validate();
+        });
+        form.addEventListener('input', function () { if (touched) validate(); });
 
         var checks = {
-            request_type: function () { return !!val('request_type'); },
-            first_name: function () { return val('first_name').length > 1; },
-            last_name: function () { return val('last_name').length > 1; },
-            phone: function () { return val('phone').replace(/\D/g, '').length >= 9; },
-            email: function () { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val('email')); },
-            freeze_start: function () { return !isFreeze() || !!val('freeze_start'); },
-            freeze_length: function () { return !isFreeze() || !!val('freeze_length'); },
-            reason: function () { return !!val('reason'); },
-            consents: function () { return !!val('consent_contact') && !!val('consent_privacy'); }
+            request_type: [choice, function () { return !!val('request_type'); }],
+            first_name: [null, function () { return val('first_name').length > 1; }],
+            last_name: [null, function () { return val('last_name').length > 1; }],
+            phone: [null, function () { return val('phone').replace(/\D/g, '').length >= 9; }],
+            email: [null, function () { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val('email')); }],
+            freeze_start: [null, function () { return !isFreeze() || !!val('freeze_start'); }],
+            freeze_length: [document.querySelector('.cf-len'), function () { return !isFreeze() || !!val('freeze_length'); }],
+            reason: [null, function () { return !!val('reason'); }],
+            consents: [null, function () { return !!val('consent_contact') && !!val('consent_privacy'); }]
         };
 
-        function containerFor(name) {
-            var err = form.querySelector('.cfr-error[data-for="' + name + '"]');
-            return err ? err.parentElement : null;
-        }
-
         function validate() {
-            var firstBad = null;
+            var first = null;
             Object.keys(checks).forEach(function (name) {
-                var ok = checks[name]();
-                var box = containerFor(name);
-                if (box) box.classList.toggle('is-invalid', !ok);
-                if (!ok && !firstBad) firstBad = box;
+                var ok = checks[name][1]();
+                var err = form.querySelector('.cf-err[data-for="' + name + '"]');
+                var box = checks[name][0];
+                if (name === 'consents') {
+                    form.querySelectorAll('.cf-check').forEach(function (c) { c.classList.toggle('is-bad', !ok && !c.querySelector('input').checked); });
+                    err.classList.toggle('is-on', !ok);
+                } else if (box) {
+                    box.classList.toggle('is-bad', !ok);
+                    err.classList.toggle('is-on', !ok);
+                } else {
+                    err.parentElement.classList.toggle('is-bad', !ok);
+                    if (!err.parentElement.classList.contains('cf-f')) err.classList.toggle('is-on', !ok);
+                }
+                if (!ok && !first) first = box || err.parentElement;
             });
-            return firstBad;
+            return first;
         }
-
-        // Inline validation once the user has tried to submit
-        form.addEventListener('input', function () { if (touched) validate(); });
-        form.addEventListener('change', function () { if (touched) validate(); });
-
-        // Today as the earliest freeze start date
-        var start = document.getElementById('fStart');
-        start.min = new Date().toISOString().slice(0, 10);
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -380,8 +376,8 @@
             var bad = validate();
             if (bad) {
                 bad.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                var focusable = bad.querySelector('input, select, textarea');
-                if (focusable) focusable.focus({ preventScroll: true });
+                var f = bad.querySelector('input:not([type=radio]), textarea');
+                if (f) f.focus({ preventScroll: true });
                 return;
             }
             if (val('bot-field')) return;
@@ -390,17 +386,19 @@
             new FormData(form).forEach(function (v, k) { if (k !== 'bot-field') payload[k] = v; });
             payload.submitted_at = new Date().toISOString();
             payload.page = location.href;
-
-            submit.disabled = true;
             // TODO: wire to the backend (email to the front desk and/or Arbox task). Front end only for now.
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ event: 'cancel_freeze_request', request_type: payload.request_type });
 
+            var freeze = isFreeze();
+            document.getElementById('cfDoneTitle').textContent = freeze ? 'בקשת ההקפאה התקבלה' : 'בקשת הביטול התקבלה';
+            document.getElementById('cfDoneText').textContent = 'צוות De Club יחזור אליכם תוך 3 ימי עסקים כדי להשלים אותה.' + (freeze ? ' עד אז המנוי פעיל כרגיל.' : '');
             form.hidden = true;
-            document.querySelector('.cfr-intro').hidden = true;
-            success.hidden = false;
-            success.focus();
-            document.getElementById('cfrCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.querySelector('.cf-head').hidden = true;
+            var done = document.getElementById('cfDone');
+            done.hidden = false;
+            done.focus({ preventScroll: true });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     })();
     </script>
