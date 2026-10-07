@@ -14,7 +14,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Heebo:wght@400;500;700&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Heebo:wght@200;300;400;500&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="pages.css">
     <link rel="shortcut icon" href="assets/images/logos/favicon.png" type="image/png">
@@ -27,49 +27,65 @@
     })(window,document,'script','dataLayer','GTM-KC45WQ5M');</script>
     <!-- End Google Tag Manager -->
     <style>
-        /* Cancel / freeze request (page-scoped), modeled on the hanna.house layout */
-        .cf { font-family: 'Heebo', var(--font-body); color: var(--color-cream); padding: 120px 20px 120px; }
-        .cf-panel { max-width: 780px; margin: 0 auto; padding: 56px 64px 64px; background: var(--color-surface); border-radius: 4px; }
-        .cf-title { font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 700; line-height: 1.15; text-align: center; color: var(--color-cream); margin-bottom: 22px; }
-        .cf-lede { font-size: 0.98rem; font-weight: 400; line-height: 1.6; text-align: center; color: var(--color-cream); opacity: 0.85; margin-bottom: 36px; }
+        /* Cancel / freeze request (page-scoped). Structure follows the hanna.house reference, styled as De Club. */
+        .cf { --line: rgba(245, 240, 232, 0.14); --err: #e2867e; position: relative; font-family: 'Heebo', var(--font-body); color: var(--color-cream); padding: 0 20px 140px; }
+        .cf-visual { position: relative; height: 46vh; min-height: 320px; max-height: 480px; margin: 0 -20px; overflow: hidden; }
+        .cf-visual img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; filter: saturate(0.85); }
+        .cf-visual::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.15) 45%, #000 100%); }
 
-        .cf-form { max-width: 650px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-        .cf-f { display: flex; flex-direction: column; }
-        .cf-f input, .cf-f select, .cf-f textarea { width: 100%; height: 48px; padding: 0 16px; background: transparent; border: 1.5px solid rgba(245, 240, 232, 0.75); border-radius: 0; color: var(--color-cream); font-family: inherit; font-size: 1rem; font-weight: 500; outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-        .cf-f input::placeholder, .cf-f textarea::placeholder { color: var(--color-cream); opacity: 1; }
-        .cf-f input:focus, .cf-f select:focus, .cf-f textarea:focus { border-color: var(--color-sage); box-shadow: inset 0 0 0 1px var(--color-sage); }
-        .cf-f textarea { height: auto; min-height: 80px; padding: 12px 16px; resize: vertical; line-height: 1.5; }
-        .cf-f select { appearance: none; -webkit-appearance: none; cursor: pointer; color-scheme: dark; padding-left: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23f5f0e8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 14px center; }
-        .cf-f select.is-empty { color: var(--color-cream); }
-        .cf-f select option { color: #000; background: var(--color-cream); }
-        .cf-f input[type="email"], .cf-f input[type="tel"] { direction: rtl; }
-        .cf-f input[type="email"]:not(:placeholder-shown), .cf-f input[type="tel"]:not(:placeholder-shown) { direction: ltr; text-align: right; }
+        .cf-panel { position: relative; z-index: 1; max-width: 760px; margin: -150px auto 0; padding: 56px 60px 60px; background: rgba(26, 26, 23, 0.86); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); border: 1px solid rgba(245, 240, 232, 0.08); border-radius: 36px; }
+        .cf-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 200; line-height: 1.1; letter-spacing: -0.01em; text-align: center; color: var(--color-cream); margin-bottom: 18px; }
+        .cf-lede { max-width: 36em; margin: 0 auto 40px; font-size: 1rem; font-weight: 300; line-height: 1.75; text-align: center; color: var(--color-text-muted); }
 
-        .cf-checks { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding-inline-start: 2px; }
-        .cf-check { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; line-height: 1.45; color: var(--color-cream); cursor: pointer; }
-        .cf-check input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 14px; height: 14px; border: 1.5px solid var(--color-cream); border-radius: 0; background: transparent; cursor: pointer; position: relative; }
-        .cf-check input:checked::after { content: ''; position: absolute; inset: 2px; background: var(--color-cream); }
-        .cf-check input:focus-visible { outline: 2px solid var(--color-sage); outline-offset: 2px; }
+        .cf-form { display: flex; flex-direction: column; gap: 14px; }
+        .cf-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* Floating-label fields: label sits inside like the reference, lifts once filled */
+        .cf-f { position: relative; display: flex; flex-direction: column; min-width: 0; }
+        .cf-f input, .cf-f select, .cf-f textarea { width: 100%; height: 60px; padding: 22px 20px 6px; background: rgba(245, 240, 232, 0.04); border: 1px solid var(--line); border-radius: 16px; color: var(--color-cream); font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
+        .cf-f input[dir="ltr"] { text-align: right; }
+        .cf-f label { position: absolute; top: 19px; right: 20px; font-size: 1rem; font-weight: 400; color: var(--color-text-muted); pointer-events: none; transform-origin: right top; transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease; }
+        .cf-f input:focus ~ label, .cf-f input:not(:placeholder-shown) ~ label,
+        .cf-f textarea:focus ~ label, .cf-f textarea:not(:placeholder-shown) ~ label,
+        .cf-f select:focus ~ label, .cf-f select:valid ~ label { transform: translateY(-11px) scale(0.76); }
+        .cf-f input:focus, .cf-f select:focus, .cf-f textarea:focus { border-color: var(--color-sage); background: rgba(245, 240, 232, 0.06); box-shadow: 0 0 0 4px rgba(209, 220, 189, 0.1); }
+        .cf-f input:focus ~ label, .cf-f select:focus ~ label, .cf-f textarea:focus ~ label { color: var(--color-sage); }
+        .cf-f select { appearance: none; -webkit-appearance: none; cursor: pointer; color-scheme: dark; padding-left: 46px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23b0aba3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 20px center; }
+        .cf-f select option { color: var(--color-cream); background: var(--color-surface); }
+        .cf-f textarea { height: auto; min-height: 120px; padding-top: 28px; resize: vertical; line-height: 1.6; }
+
+        .cf-checks { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .cf-check { margin: 0; font-family: inherit; font-size: 0.86rem; align-items: flex-start; }
+        .cf-check input[type="checkbox"] { margin-top: 3px; }
         .cf-check a { color: var(--color-cream); text-decoration: underline; text-underline-offset: 3px; }
+        .cf-check input:focus-visible { outline: 2px solid var(--color-sage); outline-offset: 2px; }
 
-        .cf-submit { align-self: center; display: inline-flex; justify-content: center; align-items: center; min-width: 216px; height: 44px; margin-top: 18px; padding: 0 32px; background: transparent; color: var(--color-cream); border: 1.5px solid var(--color-cream); border-radius: 999px; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s ease, color 0.2s ease, transform 100ms ease-out; }
-        .cf-submit:hover { background: var(--color-sage); border-color: var(--color-sage); color: var(--color-bg); }
-        .cf-submit:active { transform: scale(0.98); }
-        .cf-submit:focus-visible { outline: 2px solid var(--color-sage); outline-offset: 3px; }
-        .cf-done { text-align: center; outline: none; }
-        .cf-submit--link { margin-top: 4px; }
+        .cf-submit { align-self: center; display: inline-flex; justify-content: center; align-items: center; min-width: 240px; height: 56px; margin-top: 22px; padding: 0 40px; background: var(--color-sage); color: var(--color-bg); border: 0; border-radius: 999px; font-family: inherit; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: background 0.2s ease, transform 100ms ease-out; }
+        .cf-submit:hover { background: var(--color-green); }
+        .cf-submit:active { transform: scale(0.97); }
+        .cf-submit:focus-visible { outline: 2px solid var(--color-cream); outline-offset: 3px; }
+        .cf-submit--ghost { background: transparent; color: var(--color-cream); border: 1px solid rgba(245, 240, 232, 0.3); }
+        .cf-submit--ghost:hover { background: transparent; border-color: var(--color-sage); }
 
-        .cf-err { display: none; margin-top: 6px; font-size: 0.8rem; color: #e2867e; }
+        .cf-done { text-align: center; outline: none; animation: cfIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .cf-done-icon { width: 64px; height: 64px; margin: 0 auto 24px; border-radius: 50%; background: rgba(209, 220, 189, 0.12); display: flex; align-items: center; justify-content: center; }
+        .cf-done-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--color-sage); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        @keyframes cfIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+        .cf-err { display: none; margin-top: 6px; padding-right: 4px; font-size: 0.8rem; color: var(--err); }
         .cf-f.is-bad > .cf-err, .cf-err.is-on { display: block; }
-        .cf-f.is-bad > input, .cf-f.is-bad > select { border-color: #e2867e; }
+        .cf-f.is-bad > input, .cf-f.is-bad > select { border-color: var(--err); }
 
         .cf-hp { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-        @media (max-width: 640px) {
-            .cf { padding: 100px 0 80px; }
-            .cf-panel { padding: 40px 20px 48px; border-radius: 0; }
-            .cf-lede br { display: none; }
+        @media (max-width: 680px) {
+            .cf-visual { height: 34vh; min-height: 240px; }
+            .cf-panel { margin-top: -90px; padding: 36px 20px 40px; border-radius: 28px; }
+            .cf-pair { grid-template-columns: 1fr; }
+            .cf-submit { width: 100%; }
         }
+        @media (prefers-reduced-motion: reduce) { .cf-f label, .cf-done { transition: none; animation: none; } }
+        @media (prefers-reduced-transparency: reduce) { .cf-panel { background: var(--color-surface); backdrop-filter: none; -webkit-backdrop-filter: none; } }
     </style>
 </head>
 <body>
@@ -115,45 +131,22 @@
     </div>
 
     <main class="cf" dir="rtl" lang="he">
+        <div class="cf-visual" aria-hidden="true"><img src="assets/images/heroes/livo-main.webp" alt=""></div>
         <div class="cf-panel">
             <div class="cf-main" id="cfMain">
                 <h1 class="cf-title">בקשת ביטול / הקפאת מנוי</h1>
-                <p class="cf-lede">לפני שממשיכים, חשוב לנו שתדעו שאנחנו כאן לכל שאלה או התלבטות ונשמח לעזור.<br>אם בכל זאת ברצונכם להגיש בקשת ביטול או הקפאת מנוי, יש למלא את הטופס<br>ואנחנו ניצור קשר להשלמת הבקשה.</p>
+                <p class="cf-lede">לפני שממשיכים, חשוב לנו שתדעו שאנחנו כאן לכל שאלה או התלבטות ונשמח לעזור. אם בכל זאת ברצונכם להגיש בקשת ביטול או הקפאת מנוי, מלאו את הטופס ואנחנו ניצור קשר להשלמת הבקשה.</p>
 
                 <form class="cf-form" id="cfForm" novalidate>
                     <div class="cf-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label></div>
-
-                    <div class="cf-f"><input id="fFirst" name="first_name" type="text" placeholder="שם פרטי*" aria-label="שם פרטי" autocomplete="given-name"><p class="cf-err">יש להזין שם פרטי</p></div>
-                    <div class="cf-f"><input id="fLast" name="last_name" type="text" placeholder="שם משפחה*" aria-label="שם משפחה" autocomplete="family-name"><p class="cf-err">יש להזין שם משפחה</p></div>
-                    <div class="cf-f"><input id="fEmail" name="email" type="email" placeholder="דוא״ל*" aria-label="דוא״ל" autocomplete="email"><p class="cf-err">יש להזין כתובת דוא״ל תקינה</p></div>
-                    <div class="cf-f"><input id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="טלפון נייד*" aria-label="טלפון נייד" autocomplete="tel"><p class="cf-err">יש להזין מספר טלפון נייד</p></div>
-                    <div class="cf-f">
-                        <select id="fType" name="request_type" aria-label="סוג הבקשה">
-                            <option value="" selected disabled>סוג הבקשה*</option>
-                            <option value="cancel">ביטול</option>
-                            <option value="freeze">הקפאה</option>
-                        </select>
-                        <p class="cf-err">יש לבחור את סוג הבקשה</p>
-                    </div>
-                    <div class="cf-f">
-                        <select id="fReason" name="reason" aria-label="סיבת הבקשה">
-                            <option value="" selected disabled>סיבת הבקשה*</option>
-                            <option value="schedule">שינוי לוח הזמנים</option>
-                            <option value="moving">מעבר דירה</option>
-                            <option value="medical">סיבה רפואית</option>
-                            <option value="reserve">מילואים</option>
-                            <option value="travel">חופשה/ נסיעה</option>
-                            <option value="studies">לימודים</option>
-                            <option value="pregnancy">הריון</option>
-                            <option value="other">אחר</option>
-                        </select>
-                        <p class="cf-err">יש לבחור את סיבת הבקשה</p>
-                    </div>
-                    <div class="cf-f"><textarea id="fNotes" name="notes" rows="3" placeholder="הערות" aria-label="הערות" maxlength="1000"></textarea></div>
+                    <div class="cf-pair"><div class="cf-f"><input id="fFirst" name="first_name" type="text" placeholder=" " autocomplete="given-name"><label for="fFirst">שם פרטי*</label><p class="cf-err">יש להזין שם פרטי</p></div><div class="cf-f"><input id="fLast" name="last_name" type="text" placeholder=" " autocomplete="family-name"><label for="fLast">שם משפחה*</label><p class="cf-err">יש להזין שם משפחה</p></div></div>
+                    <div class="cf-pair"><div class="cf-f"><input id="fEmail" name="email" type="email" placeholder=" " autocomplete="email" dir="ltr"><label for="fEmail">דוא״ל*</label><p class="cf-err">יש להזין כתובת דוא״ל תקינה</p></div><div class="cf-f"><input id="fPhone" name="phone" type="tel" placeholder=" " inputmode="tel" autocomplete="tel" dir="ltr"><label for="fPhone">טלפון נייד*</label><p class="cf-err">יש להזין מספר טלפון נייד</p></div></div>
+                    <div class="cf-pair"><div class="cf-f cf-f--select"><select id="fType" name="request_type" required><option value="" selected disabled hidden></option><option value="cancel">ביטול</option><option value="freeze">הקפאה</option></select><label for="fType">סוג הבקשה*</label><p class="cf-err">יש לבחור את סוג הבקשה</p></div><div class="cf-f cf-f--select"><select id="fReason" name="reason" required><option value="" selected disabled hidden></option><option value="schedule">שינוי לוח הזמנים</option><option value="moving">מעבר דירה</option><option value="medical">סיבה רפואית</option><option value="reserve">מילואים</option><option value="travel">חופשה/ נסיעה</option><option value="studies">לימודים</option><option value="pregnancy">הריון</option><option value="other">אחר</option></select><label for="fReason">סיבת הבקשה*</label><p class="cf-err">יש לבחור את סיבת הבקשה</p></div></div>
+                    <div class="cf-f cf-f--area"><textarea id="fNotes" name="notes" rows="3" placeholder=" " maxlength="1000"></textarea><label for="fNotes">הערות</label></div>
 
                     <div class="cf-checks">
-                        <label class="cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה להיות בקשר במייל, סמס, וואטסאפ ואמצעים אלקטרוניים שונים</span></label>
-                        <label class="cf-check"><input type="checkbox" name="consent_privacy" value="yes"><span>אני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ומסכימ/ה שהמידע ישמש למענה לפנייה ולמטרות המפורטות בה*</span></label>
+                        <label class="modal-consent cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה להיות בקשר במייל, סמס, וואטסאפ ואמצעים אלקטרוניים שונים</span></label>
+                        <label class="modal-consent cf-check"><input type="checkbox" name="consent_privacy" value="yes"><span>אני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ומסכימ/ה שהמידע ישמש למענה לפנייה ולמטרות המפורטות בה*</span></label>
                         <p class="cf-err" id="cfConsentErr">יש לאשר את מדיניות הפרטיות</p>
                     </div>
 
@@ -162,9 +155,10 @@
             </div>
 
             <div class="cf-done" id="cfDone" hidden tabindex="-1">
+                <div class="cf-done-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
                 <h2 class="cf-title">הבקשה נשלחה</h2>
                 <p class="cf-lede">צוות De Club ייצור איתכם קשר תוך 3 ימי עסקים לצורך המשך טיפול בבקשה.</p>
-                <a href="index.html" class="cf-submit cf-submit--link">חזרה לאתר</a>
+                <a href="index.html" class="cf-submit cf-submit--ghost">חזרה לאתר</a>
             </div>
 
             <!-- TODO: De Club cancellation and freeze policy section (like the reference), waiting for the policy text. -->
@@ -199,19 +193,16 @@
             request_type: function () { return !!v('request_type'); },
             reason: function () { return !!v('reason'); }
         };
-        form.querySelectorAll('select').forEach(function (s) {
-            s.classList.add('is-empty');
-            s.addEventListener('change', function () { s.classList.toggle('is-empty', !s.value); });
-        });
         function validate() {
             var first = null;
             Object.keys(rules).forEach(function (n) {
-                var ok = rules[n](), box = form.elements[n].parentElement;
-                box.classList.toggle('is-bad', !ok);
+                var ok = rules[n]();
+                form.elements[n].parentElement.classList.toggle('is-bad', !ok);
                 if (!ok && !first) first = form.elements[n];
             });
             var c = v('consent_privacy');
             document.getElementById('cfConsentErr').classList.toggle('is-on', !c);
+            form.elements.consent_privacy.closest('label').classList.toggle('modal-consent--error', !c);
             if (!c && !first) first = form.elements.consent_privacy;
             return first;
         }
@@ -232,8 +223,8 @@
             document.getElementById('cfMain').hidden = true;
             var done = document.getElementById('cfDone');
             done.hidden = false;
-            done.focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            done.focus({ preventScroll: true });
+            done.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     })();
     </script>
