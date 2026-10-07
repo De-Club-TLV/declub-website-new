@@ -163,9 +163,9 @@
                     <div class="cf-f cf-f--area"><textarea id="fNotes" name="notes" rows="3" placeholder=" " maxlength="1000"></textarea><label for="fNotes">הערות</label></div>
 
                     <div class="cf-checks">
-                        <label class="modal-consent cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה להיות בקשר במייל, סמס, וואטסאפ ואמצעים אלקטרוניים שונים</span></label>
+                        <label class="modal-consent cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה להיות בקשר במייל, סמס, וואטסאפ ואמצעים אלקטרוניים שונים*</span></label>
                         <label class="modal-consent cf-check"><input type="checkbox" name="consent_privacy" value="yes"><span>אני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ומסכימ/ה שהמידע ישמש למענה לפנייה ולמטרות המפורטות בה*</span></label>
-                        <p class="cf-err" id="cfConsentErr">יש לאשר את מדיניות הפרטיות</p>
+                        <p class="cf-err" id="cfConsentErr">יש לאשר את שני הסעיפים כדי לשלוח</p>
                     </div>
 
                     <button type="submit" class="cf-submit">שליחה</button>
@@ -218,10 +218,13 @@
                 form.elements[n].parentElement.classList.toggle('is-bad', !ok);
                 if (!ok && !first) first = form.elements[n];
             });
-            var c = v('consent_privacy');
-            document.getElementById('cfConsentErr').classList.toggle('is-on', !c);
-            form.elements.consent_privacy.closest('label').classList.toggle('modal-consent--error', !c);
-            if (!c && !first) first = form.elements.consent_privacy;
+            var consentOk = true;
+            ['consent_contact', 'consent_privacy'].forEach(function (n) {
+                var ok = v(n);
+                form.elements[n].closest('label').classList.toggle('modal-consent--error', !ok);
+                if (!ok) { consentOk = false; if (!first) first = form.elements[n]; }
+            });
+            document.getElementById('cfConsentErr').classList.toggle('is-on', !consentOk);
             return first;
         }
 
