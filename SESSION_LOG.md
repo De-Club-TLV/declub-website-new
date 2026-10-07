@@ -1,9 +1,26 @@
 # Session Log
 
-## Spend to date
+## Tokens to date
 - Sessions: 5
 - Tokens (in / out / cache-read): 123,992 / 791,606 / 234,127,642
-- Cost: $199.5800
+
+---
+
+## 2026-10-07
+
+**Host:** macbook
+**Focus:** 120 Hours product copy and new cancel/freeze request page
+
+**Done:**
+- join.html: Ritual Start card, FAQ and trial CTA renamed "120 Hours at De Club" (5 days, up to 3 entries, ₪230)
+- index.html + join.html: Arbox CTA link f25j7Zay -> kGd1Gk0y (product 456936)
+- New cancel-freeze-request.html (served at /cancel-freeze-request): hanna.house field order, LIVO hero image, frosted panel, floating labels, custom listbox dropdowns over hidden native selects, both consents required, honeypot (sr-only clip), dataLayer event cancel_freeze_request. noindex, nofollow; not linked from nav
+
+**Next:**
+- Wire submit to backend (TODO in script); add policy section (TODO comment) when text arrives
+- Link the page from footer/FAQ once the backend is live
+
+**Tokens:** shared session with De Club, see ../SESSION_LOG.md
 
 ---
 
