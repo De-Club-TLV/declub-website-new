@@ -86,6 +86,24 @@
         }
         @media (prefers-reduced-motion: reduce) { .cf-f label, .cf-done { transition: none; animation: none; } }
         @media (prefers-reduced-transparency: reduce) { .cf-panel { background: var(--color-surface); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+        /* Branded dropdown (enhances the native select, which stays in the form for the value) */
+        .cf-f--select select { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+        .cf-dd-btn { width: 100%; height: 60px; padding: 22px 20px 6px 46px; background: rgba(245, 240, 232, 0.04); border: 1px solid var(--line); border-radius: 16px; color: var(--color-cream); font-family: inherit; font-size: 1rem; text-align: right; cursor: pointer; outline: none; transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 100ms ease-out; }
+        .cf-dd-btn::after { content: ''; position: absolute; left: 20px; top: 50%; width: 12px; height: 8px; margin-top: -4px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23b0aba3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+        .cf-dd-btn:active { transform: scale(0.99); }
+        .cf-dd.is-open .cf-dd-btn, .cf-dd-btn:focus-visible { border-color: var(--color-sage); background: rgba(245, 240, 232, 0.06); box-shadow: 0 0 0 4px rgba(209, 220, 189, 0.1); }
+        .cf-dd.is-open .cf-dd-btn::after { transform: rotate(180deg); }
+        .cf-dd.is-open label, .cf-dd:focus-within label { color: var(--color-sage); }
+        .cf-dd.has-value label, .cf-dd.is-open label { transform: translateY(-11px) scale(0.76); }
+        .cf-f.is-bad .cf-dd-btn { border-color: var(--err); }
+        .cf-dd-list { position: absolute; top: calc(100% + 8px); right: 0; left: 0; z-index: 20; margin: 0; padding: 6px; list-style: none; max-height: 440px; overflow-y: auto; background: rgba(30, 30, 27, 0.96); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid rgba(245, 240, 232, 0.12); border-radius: 18px; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5); opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top center; transition: opacity 0.18s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.28s; }
+        .cf-dd.is-open .cf-dd-list { opacity: 1; visibility: visible; transform: none; transition: opacity 0.18s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s; }
+        .cf-dd-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; font-size: 0.98rem; color: var(--color-cream); cursor: pointer; user-select: none; transition: background 0.15s ease, color 0.15s ease; }
+        .cf-dd-opt.is-active { background: rgba(209, 220, 189, 0.12); }
+        .cf-dd-opt[aria-selected="true"] { color: var(--color-sage); }
+        .cf-dd-opt[aria-selected="true"]::after { content: ''; width: 5px; height: 10px; margin-left: 4px; border: solid var(--color-sage); border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-2px); }
+        .cf-dd.is-open { z-index: 30; }
+        @media (prefers-reduced-motion: reduce) { .cf-dd-list, .cf-dd.is-open .cf-dd-list, .cf-dd-btn::after { transition: none; } }
     </style>
 </head>
 <body>
@@ -206,13 +224,102 @@
             if (!c && !first) first = form.elements.consent_privacy;
             return first;
         }
+
+        // Branded dropdowns: a button + listbox drive the hidden native select
+        form.querySelectorAll('.cf-f--select').forEach(function (box) {
+            var sel = box.querySelector('select');
+            var label = box.querySelector('label');
+            var opts = Array.prototype.filter.call(sel.options, function (o) { return o.value; });
+            var lid = sel.id + 'List';
+            box.classList.add('cf-dd');
+            sel.tabIndex = -1;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cf-dd-btn';
+            btn.id = sel.id + 'Btn';
+            btn.setAttribute('aria-haspopup', 'listbox');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-controls', lid);
+            btn.setAttribute('aria-labelledby', btn.id + ' ' + sel.id + 'Lbl');
+            label.id = sel.id + 'Lbl';
+            label.setAttribute('for', btn.id);
+            var list = document.createElement('ul');
+            list.className = 'cf-dd-list';
+            list.id = lid;
+            list.setAttribute('role', 'listbox');
+            list.setAttribute('aria-labelledby', label.id);
+            list.tabIndex = -1;
+            opts.forEach(function (o, i) {
+                var li = document.createElement('li');
+                li.className = 'cf-dd-opt';
+                li.id = lid + i;
+                li.setAttribute('role', 'option');
+                li.setAttribute('aria-selected', 'false');
+                li.textContent = o.textContent;
+                li.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+                li.addEventListener('click', function () { choose(i); close(true); });
+                li.addEventListener('pointermove', function () { setActive(i); });
+                list.appendChild(li);
+            });
+            sel.after(btn);
+            box.appendChild(list);
+            var items = list.children, active = -1;
+
+            function setActive(i) {
+                if (active > -1) items[active].classList.remove('is-active');
+                active = i;
+                if (i > -1) { items[i].classList.add('is-active'); btn.setAttribute('aria-activedescendant', items[i].id); items[i].scrollIntoView({ block: 'nearest' }); }
+            }
+            function choose(i) {
+                sel.value = opts[i].value;
+                btn.textContent = opts[i].textContent;
+                Array.prototype.forEach.call(items, function (li, k) { li.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
+                box.classList.add('has-value');
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            function open() {
+                document.querySelectorAll('.cf-dd.is-open').forEach(function (d) { if (d !== box) d.classList.remove('is-open'); });
+                box.classList.add('is-open');
+                btn.setAttribute('aria-expanded', 'true');
+                setActive(Math.max(0, opts.findIndex(function (o) { return o.value === sel.value; })));
+            }
+            function close(focus) {
+                box.classList.remove('is-open');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.removeAttribute('aria-activedescendant');
+                setActive(-1);
+                if (focus) btn.focus();
+            }
+            btn.addEventListener('click', function () { box.classList.contains('is-open') ? close() : open(); });
+            btn.addEventListener('keydown', function (e) {
+                var isOpen = box.classList.contains('is-open');
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (!isOpen) return open();
+                    setActive((active + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length);
+                } else if ((e.key === 'Enter' || e.key === ' ') && isOpen) {
+                    e.preventDefault();
+                    if (active > -1) choose(active);
+                    close(true);
+                } else if (e.key === 'Escape' && isOpen) {
+                    e.preventDefault(); close(true);
+                } else if (e.key === 'Tab' && isOpen) {
+                    close();
+                }
+            });
+            btn.addEventListener('blur', function () { setTimeout(function () { if (!box.contains(document.activeElement)) close(); }, 0); });
+            sel.addEventListener('focus', function () { btn.focus(); });
+        });
+        document.addEventListener('pointerdown', function (e) {
+            document.querySelectorAll('.cf-dd.is-open').forEach(function (d) { if (!d.contains(e.target)) { d.classList.remove('is-open'); d.querySelector('.cf-dd-btn').setAttribute('aria-expanded', 'false'); } });
+        });
         form.addEventListener('input', function () { if (touched) validate(); });
         form.addEventListener('change', function () { if (touched) validate(); });
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             touched = true;
             var bad = validate();
-            if (bad) { bad.focus(); return; }
+            if (bad) { (bad.tagName === 'SELECT' ? bad.parentElement.querySelector('.cf-dd-btn') : bad).focus(); return; }
             if (form.elements['bot-field'].value) return;
             var payload = {};
             new FormData(form).forEach(function (val, k) { if (k !== 'bot-field') payload[k] = val; });
