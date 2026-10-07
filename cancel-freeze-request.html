@@ -14,7 +14,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Heebo:wght@200;300;400;500&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Heebo:wght@400;500;700&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="pages.css">
     <link rel="shortcut icon" href="assets/images/logos/favicon.png" type="image/png">
@@ -27,117 +27,48 @@
     })(window,document,'script','dataLayer','GTM-KC45WQ5M');</script>
     <!-- End Google Tag Manager -->
     <style>
-        /* Cancel / freeze request (page-scoped) */
-        .cf { --line: rgba(245, 240, 232, 0.12); --line-strong: rgba(245, 240, 232, 0.28); --err: #e2867e; font-family: 'Heebo', var(--font-body); color: var(--color-cream); padding: 168px 0 140px; }
-        .cf-wrap { width: min(620px, 100% - 40px); margin: 0 auto; }
-        .cf-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        /* Cancel / freeze request (page-scoped), modeled on the hanna.house layout */
+        .cf { font-family: 'Heebo', var(--font-body); color: var(--color-cream); padding: 120px 20px 120px; }
+        .cf-panel { max-width: 780px; margin: 0 auto; padding: 56px 64px 64px; background: var(--color-surface); border-radius: 4px; }
+        .cf-title { font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 700; line-height: 1.15; text-align: center; color: var(--color-cream); margin-bottom: 22px; }
+        .cf-lede { font-size: 0.98rem; font-weight: 400; line-height: 1.6; text-align: center; color: var(--color-cream); opacity: 0.85; margin-bottom: 36px; }
 
-        .cf-head { margin-bottom: 56px; }
-        .cf-title { font-size: clamp(2.6rem, 8vw, 4.6rem); font-weight: 200; line-height: 1.02; letter-spacing: -0.01em; color: var(--color-cream); margin-bottom: 28px; }
-        .cf-lede { max-width: 34em; font-size: 1.06rem; font-weight: 300; line-height: 1.75; color: var(--color-text-muted); margin-bottom: 22px; }
-        .cf-wa { display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; color: var(--color-sage); padding-bottom: 3px; border-bottom: 1px solid rgba(209, 220, 189, 0.35); transition: border-color 0.2s ease, color 0.2s ease; }
-        .cf-wa svg { width: 18px; height: 18px; fill: currentColor; }
-        .cf-wa:hover { color: var(--color-cream); border-color: var(--color-cream); }
+        .cf-form { max-width: 650px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        .cf-f { display: flex; flex-direction: column; }
+        .cf-f input, .cf-f select, .cf-f textarea { width: 100%; height: 48px; padding: 0 16px; background: transparent; border: 1.5px solid rgba(245, 240, 232, 0.75); border-radius: 0; color: var(--color-cream); font-family: inherit; font-size: 1rem; font-weight: 500; outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+        .cf-f input::placeholder, .cf-f textarea::placeholder { color: var(--color-cream); opacity: 1; }
+        .cf-f input:focus, .cf-f select:focus, .cf-f textarea:focus { border-color: var(--color-sage); box-shadow: inset 0 0 0 1px var(--color-sage); }
+        .cf-f textarea { height: auto; min-height: 80px; padding: 12px 16px; resize: vertical; line-height: 1.5; }
+        .cf-f select { appearance: none; -webkit-appearance: none; cursor: pointer; color-scheme: dark; padding-left: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23f5f0e8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 14px center; }
+        .cf-f select.is-empty { color: var(--color-cream); }
+        .cf-f select option { color: #000; background: var(--color-cream); }
+        .cf-f input[type="email"], .cf-f input[type="tel"] { direction: rtl; }
+        .cf-f input[type="email"]:not(:placeholder-shown), .cf-f input[type="tel"]:not(:placeholder-shown) { direction: ltr; text-align: right; }
 
-        /* The choice: two tiles that are the first field */
-        .cf-choice { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .cf-choice input { position: absolute; opacity: 0; pointer-events: none; }
-        .cf-tile { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; min-height: 220px; padding: 26px 26px 24px; border: 1px solid var(--line); border-radius: 28px; cursor: pointer; user-select: none; overflow: hidden; transition: border-color 0.25s ease, background-color 0.35s ease, color 0.35s ease, transform 120ms ease-out, opacity 0.3s ease; }
-        .cf-tile:hover { border-color: var(--line-strong); }
-        .cf-tile:active { transform: scale(0.985); }
-        .cf-tile-word { font-size: clamp(2.2rem, 6vw, 3.3rem); font-weight: 200; line-height: 1; }
-        .cf-tile-note { font-size: 0.9rem; font-weight: 300; line-height: 1.5; color: var(--color-text-muted); transition: color 0.35s ease; }
-        .cf-tile--freeze::after { content: ''; position: absolute; inset: auto -30% -60% auto; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(209, 220, 189, 0.16), transparent 70%); pointer-events: none; }
-        .cf-choice input:focus-visible + .cf-tile { outline: 2px solid var(--color-sage); outline-offset: 3px; }
-        #rtFreeze:checked + .cf-tile { background: var(--color-sage); border-color: var(--color-sage); color: var(--color-bg); }
-        #rtFreeze:checked + .cf-tile .cf-tile-note { color: rgba(0, 0, 0, 0.62); }
-        #rtCancel:checked + .cf-tile { background: var(--color-cream); border-color: var(--color-cream); color: var(--color-bg); }
-        #rtCancel:checked + .cf-tile .cf-tile-note { color: rgba(0, 0, 0, 0.6); }
-        .cf-choice.has-choice input:not(:checked) + .cf-tile { opacity: 0.55; }
-        .cf-choice.has-choice input:not(:checked) + .cf-tile:hover { opacity: 0.85; }
-
-        /* Rest of form reveals after the choice */
-        .cf-rest { padding-top: 12px; }
-        .cf-rest.is-in { animation: cfRise 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
-        @keyframes cfRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-
-        .cf-step { padding: 44px 0 0; }
-        .cf-step-title { display: flex; align-items: baseline; gap: 14px; font-size: 1.35rem; font-weight: 400; color: var(--color-cream); margin-bottom: 22px; }
-        .cf-step-n { font-size: 0.95rem; font-weight: 400; color: var(--color-sage); min-width: 1ch; }
-        .cf.is-cancel .cf-freeze-only { display: none; }
-
-        .cf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
-        .cf-f { display: flex; flex-direction: column; min-width: 0; }
-        .cf-f label { font-size: 0.85rem; font-weight: 400; color: var(--color-text-muted); margin-bottom: 8px; }
-        .cf-opt { color: rgba(176, 171, 163, 0.6); margin-inline-start: 4px; }
-        .cf-f input, .cf-f textarea { width: 100%; padding: 15px 18px; background: rgba(245, 240, 232, 0.035); border: 1px solid var(--line); border-radius: 16px; color: var(--color-cream); font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.2s ease, background 0.2s ease; }
-        .cf-f input::placeholder { color: rgba(176, 171, 163, 0.4); }
-        .cf-f input[dir="ltr"] { text-align: right; }
-        .cf-f input:focus, .cf-f textarea:focus { border-color: var(--color-sage); background: rgba(245, 240, 232, 0.06); }
-        .cf-f input[type="date"] { color-scheme: dark; min-height: 54px; }
-        .cf-f textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
-        .cf-f--date { max-width: 300px; margin-bottom: 18px; }
-        .cf-f--notes { margin-top: 26px; }
-
-        /* Freeze length: a segmented track */
-        .cf-len { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 18px; padding: 4px; gap: 4px; }
-        .cf-len input, .cf-reasons input { position: absolute; opacity: 0; pointer-events: none; }
-        .cf-len label { text-align: center; padding: 13px 6px; border-radius: 14px; font-size: 0.95rem; color: var(--color-text-muted); cursor: pointer; user-select: none; transition: background 0.25s ease, color 0.25s ease, transform 120ms ease-out; }
-        .cf-len label:hover { color: var(--color-cream); }
-        .cf-len label:active { transform: scale(0.96); }
-        .cf-len input:checked + label { background: var(--color-sage); color: var(--color-bg); font-weight: 500; }
-        .cf-len input:focus-visible + label, .cf-reasons input:focus-visible + label { outline: 2px solid var(--color-sage); outline-offset: 2px; }
-        .cf-return { min-height: 1.6em; margin-top: 16px; font-size: 1.05rem; font-weight: 300; color: var(--color-cream); }
-        .cf-return strong { font-weight: 500; color: var(--color-sage); }
-
-        .cf-reasons { display: flex; flex-wrap: wrap; gap: 8px; }
-        .cf-reasons label { padding: 10px 16px; border: 1px solid var(--line); border-radius: 999px; font-size: 0.92rem; color: var(--color-cream); cursor: pointer; user-select: none; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 120ms ease-out; }
-        .cf-reasons label:hover { border-color: var(--line-strong); }
-        .cf-reasons label:active { transform: scale(0.96); }
-        .cf-reasons input:checked + label { background: var(--color-cream); border-color: var(--color-cream); color: var(--color-bg); }
-
-        .cf-consents { display: flex; flex-direction: column; gap: 14px; padding-top: 40px; }
-        .cf-check { display: flex; align-items: flex-start; gap: 12px; font-size: 0.88rem; font-weight: 300; line-height: 1.55; color: var(--color-text-muted); cursor: pointer; }
-        .cf-check input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border: 1px solid var(--line-strong); border-radius: 6px; background: transparent; cursor: pointer; position: relative; transition: background 0.2s ease, border-color 0.2s ease; }
-        .cf-check input:checked { background: var(--color-sage); border-color: var(--color-sage); }
-        .cf-check input:checked::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--color-bg); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .cf-checks { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding-inline-start: 2px; }
+        .cf-check { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; line-height: 1.45; color: var(--color-cream); cursor: pointer; }
+        .cf-check input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 14px; height: 14px; border: 1.5px solid var(--color-cream); border-radius: 0; background: transparent; cursor: pointer; position: relative; }
+        .cf-check input:checked::after { content: ''; position: absolute; inset: 2px; background: var(--color-cream); }
         .cf-check input:focus-visible { outline: 2px solid var(--color-sage); outline-offset: 2px; }
         .cf-check a { color: var(--color-cream); text-decoration: underline; text-underline-offset: 3px; }
 
-        .cf-submit { width: 100%; margin-top: 34px; padding: 19px; border: 0; border-radius: 18px; background: var(--color-sage); color: var(--color-bg); font-family: inherit; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: background 0.2s ease, transform 120ms ease-out; }
-        .cf.is-cancel .cf-submit { background: var(--color-cream); }
-        .cf-submit:hover { background: var(--color-green); }
-        .cf.is-cancel .cf-submit:hover { background: #fff; }
-        .cf-submit:active { transform: scale(0.985); }
-        .cf-submit:focus-visible { outline: 2px solid var(--color-cream); outline-offset: 3px; }
-        .cf-fine { margin-top: 14px; font-size: 0.85rem; font-weight: 300; color: var(--color-text-muted); text-align: center; }
+        .cf-submit { align-self: center; display: inline-flex; justify-content: center; align-items: center; min-width: 216px; height: 44px; margin-top: 18px; padding: 0 32px; background: transparent; color: var(--color-cream); border: 1.5px solid var(--color-cream); border-radius: 999px; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s ease, color 0.2s ease, transform 100ms ease-out; }
+        .cf-submit:hover { background: var(--color-sage); border-color: var(--color-sage); color: var(--color-bg); }
+        .cf-submit:active { transform: scale(0.98); }
+        .cf-submit:focus-visible { outline: 2px solid var(--color-sage); outline-offset: 3px; }
+        .cf-done { text-align: center; outline: none; }
+        .cf-submit--link { margin-top: 4px; }
 
-        .cf-err { display: none; margin-top: 8px; font-size: 0.82rem; color: var(--err); }
-        .is-bad > .cf-err, .cf-err.is-on { display: block; }
-        .is-bad > input, .is-bad > textarea { border-color: var(--err); }
-        .cf-len.is-bad, .cf-choice.is-bad .cf-tile { border-color: var(--err); }
-        .cf-check.is-bad input { border-color: var(--err); }
+        .cf-err { display: none; margin-top: 6px; font-size: 0.8rem; color: #e2867e; }
+        .cf-f.is-bad > .cf-err, .cf-err.is-on { display: block; }
+        .cf-f.is-bad > input, .cf-f.is-bad > select { border-color: #e2867e; }
 
-        .cf-done { padding-top: 8px; outline: none; animation: cfRise 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
-        .cf-done-title { font-size: clamp(2rem, 6vw, 3rem); font-weight: 200; line-height: 1.1; margin-bottom: 16px; }
-        .cf-done-text { font-size: 1.06rem; font-weight: 300; line-height: 1.75; color: var(--color-text-muted); margin-bottom: 32px; max-width: 32em; }
-        .cf-home { display: inline-block; padding: 13px 26px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--color-cream); transition: border-color 0.2s ease, transform 120ms ease-out; }
-        .cf-home:hover { border-color: var(--color-sage); }
-        .cf-home:active { transform: scale(0.97); }
-
-        /* Honeypot: sr-only clip pattern, never off-screen positioning */
         .cf-hp { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-        @media (max-width: 600px) {
-            .cf { padding: 130px 0 100px; }
-            .cf-tile { min-height: 168px; padding: 20px 18px; border-radius: 22px; gap: 24px; }
-            .cf-grid { grid-template-columns: 1fr; }
-            .cf-len { grid-template-columns: 1fr 1fr; }
-            .cf-f--date { max-width: none; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .cf-rest.is-in, .cf-done { animation: none; }
-            .cf-tile, .cf-len label, .cf-reasons label { transition: none; }
+        @media (max-width: 640px) {
+            .cf { padding: 100px 0 80px; }
+            .cf-panel { padding: 40px 20px 48px; border-radius: 0; }
+            .cf-lede br { display: none; }
         }
     </style>
 </head>
@@ -184,91 +115,59 @@
     </div>
 
     <main class="cf" dir="rtl" lang="he">
-        <div class="cf-wrap">
-            <header class="cf-head">
-                <h1 class="cf-title">לעצור לרגע,<br>או להיפרד?</h1>
-                <p class="cf-lede">אפשר להקפיא את המנוי לתקופה ולחזור בדיוק מאיפה שעצרתם, או לבקש ביטול. אם משהו לא עובד לכם, ספרו לנו קודם. לפעמים שיחה קצרה פותרת הכל.</p>
-                <a class="cf-wa" href="https://wa.me/15512399833?text=Hi%20De%20Club!" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.91-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.08-.13-.27-.2-.57-.35M12.05 21.79h0a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 01-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 012.89 7c0 5.45-4.44 9.88-9.89 9.88M20.46 3.49A11.82 11.82 0 0012.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 005.68 1.45h0c6.56 0 11.89-5.34 11.9-11.9 0-3.18-1.24-6.17-3.48-8.41z"/></svg>
-                    לדבר איתנו בוואטסאפ
-                </a>
-            </header>
+        <div class="cf-panel">
+            <div class="cf-main" id="cfMain">
+                <h1 class="cf-title">בקשת ביטול / הקפאת מנוי</h1>
+                <p class="cf-lede">לפני שממשיכים, חשוב לנו שתדעו שאנחנו כאן לכל שאלה או התלבטות ונשמח לעזור.<br>אם בכל זאת ברצונכם להגיש בקשת ביטול או הקפאת מנוי, יש למלא את הטופס<br>ואנחנו ניצור קשר להשלמת הבקשה.</p>
 
-            <form class="cf-form" id="cfForm" novalidate>
-                <div class="cf-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label></div>
+                <form class="cf-form" id="cfForm" novalidate>
+                    <div class="cf-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label></div>
 
-                <fieldset class="cf-choice" id="cfChoice">
-                    <legend class="cf-sr">מה תרצו לעשות?</legend>
-                    <input type="radio" name="request_type" id="rtFreeze" value="freeze">
-                    <label for="rtFreeze" class="cf-tile cf-tile--freeze">
-                        <span class="cf-tile-word">להקפיא</span>
-                        <span class="cf-tile-note">הפסקה זמנית. המנוי מחכה לכם.</span>
-                    </label>
-                    <input type="radio" name="request_type" id="rtCancel" value="cancel">
-                    <label for="rtCancel" class="cf-tile cf-tile--cancel">
-                        <span class="cf-tile-word">לבטל</span>
-                        <span class="cf-tile-note">סיום המנוי בהתאם לתנאי ההתקשרות.</span>
-                    </label>
-                </fieldset>
-                <p class="cf-err" data-for="request_type">בחרו הקפאה או ביטול כדי להמשיך</p>
+                    <div class="cf-f"><input id="fFirst" name="first_name" type="text" placeholder="שם פרטי*" aria-label="שם פרטי" autocomplete="given-name"><p class="cf-err">יש להזין שם פרטי</p></div>
+                    <div class="cf-f"><input id="fLast" name="last_name" type="text" placeholder="שם משפחה*" aria-label="שם משפחה" autocomplete="family-name"><p class="cf-err">יש להזין שם משפחה</p></div>
+                    <div class="cf-f"><input id="fEmail" name="email" type="email" placeholder="דוא״ל*" aria-label="דוא״ל" autocomplete="email"><p class="cf-err">יש להזין כתובת דוא״ל תקינה</p></div>
+                    <div class="cf-f"><input id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="טלפון נייד*" aria-label="טלפון נייד" autocomplete="tel"><p class="cf-err">יש להזין מספר טלפון נייד</p></div>
+                    <div class="cf-f">
+                        <select id="fType" name="request_type" aria-label="סוג הבקשה">
+                            <option value="" selected disabled>סוג הבקשה*</option>
+                            <option value="cancel">ביטול</option>
+                            <option value="freeze">הקפאה</option>
+                        </select>
+                        <p class="cf-err">יש לבחור את סוג הבקשה</p>
+                    </div>
+                    <div class="cf-f">
+                        <select id="fReason" name="reason" aria-label="סיבת הבקשה">
+                            <option value="" selected disabled>סיבת הבקשה*</option>
+                            <option value="schedule">שינוי לוח הזמנים</option>
+                            <option value="moving">מעבר דירה</option>
+                            <option value="medical">סיבה רפואית</option>
+                            <option value="reserve">מילואים</option>
+                            <option value="travel">חופשה/ נסיעה</option>
+                            <option value="studies">לימודים</option>
+                            <option value="pregnancy">הריון</option>
+                            <option value="other">אחר</option>
+                        </select>
+                        <p class="cf-err">יש לבחור את סיבת הבקשה</p>
+                    </div>
+                    <div class="cf-f"><textarea id="fNotes" name="notes" rows="3" placeholder="הערות" aria-label="הערות" maxlength="1000"></textarea></div>
 
-                <div class="cf-rest" id="cfRest" hidden>
-                    <section class="cf-step">
-                        <h2 class="cf-step-title"><span class="cf-step-n">1</span>הפרטים שלכם</h2>
-                        <div class="cf-grid">
-                            <div class="cf-f"><label for="fFirst">שם פרטי</label><input id="fFirst" name="first_name" type="text" autocomplete="given-name"><p class="cf-err" data-for="first_name">הזינו שם פרטי</p></div>
-                            <div class="cf-f"><label for="fLast">שם משפחה</label><input id="fLast" name="last_name" type="text" autocomplete="family-name"><p class="cf-err" data-for="last_name">הזינו שם משפחה</p></div>
-                            <div class="cf-f"><label for="fPhone">טלפון</label><input id="fPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="050-0000000"><p class="cf-err" data-for="phone">הזינו מספר טלפון מלא</p></div>
-                            <div class="cf-f"><label for="fEmail">אימייל</label><input id="fEmail" name="email" type="email" autocomplete="email" dir="ltr" placeholder="name@email.com"><p class="cf-err" data-for="email">הזינו כתובת אימייל תקינה</p></div>
-                        </div>
-                    </section>
-
-                    <section class="cf-step cf-freeze-only" id="cfWhen">
-                        <h2 class="cf-step-title"><span class="cf-step-n">2</span>מתי ולכמה זמן</h2>
-                        <div class="cf-f cf-f--date"><label for="fStart">תאריך תחילת ההקפאה</label><input id="fStart" name="freeze_start" type="date" dir="ltr"><p class="cf-err" data-for="freeze_start">בחרו תאריך התחלה</p></div>
-                        <div class="cf-len" role="radiogroup" aria-label="משך ההקפאה">
-                            <input type="radio" name="freeze_length" id="l1" value="14d"><label for="l1">שבועיים</label>
-                            <input type="radio" name="freeze_length" id="l2" value="1m"><label for="l2">חודש</label>
-                            <input type="radio" name="freeze_length" id="l3" value="2m"><label for="l3">חודשיים</label>
-                            <input type="radio" name="freeze_length" id="l4" value="3m"><label for="l4">3 חודשים</label>
-                        </div>
-                        <p class="cf-err" data-for="freeze_length">בחרו את משך ההקפאה</p>
-                        <p class="cf-return" id="cfReturn" aria-live="polite"></p>
-                    </section>
-
-                    <section class="cf-step">
-                        <h2 class="cf-step-title"><span class="cf-step-n" id="cfReasonN">3</span>מה הסיבה?</h2>
-                        <div class="cf-reasons">
-                            <input type="radio" name="reason" id="r1" value="schedule"><label for="r1">שינוי בלוח הזמנים</label>
-                            <input type="radio" name="reason" id="r2" value="travel"><label for="r2">חופשה או נסיעה</label>
-                            <input type="radio" name="reason" id="r3" value="medical"><label for="r3">סיבה רפואית</label>
-                            <input type="radio" name="reason" id="r4" value="pregnancy"><label for="r4">הריון</label>
-                            <input type="radio" name="reason" id="r5" value="reserve"><label for="r5">מילואים</label>
-                            <input type="radio" name="reason" id="r6" value="moving"><label for="r6">מעבר דירה</label>
-                            <input type="radio" name="reason" id="r7" value="studies"><label for="r7">לימודים</label>
-                            <input type="radio" name="reason" id="r8" value="financial"><label for="r8">שיקולים כלכליים</label>
-                            <input type="radio" name="reason" id="r9" value="other"><label for="r9">אחר</label>
-                        </div>
-                        <p class="cf-err" data-for="reason">בחרו סיבה</p>
-                        <div class="cf-f cf-f--notes"><label for="fNotes">משהו שחשוב לנו לדעת? <span class="cf-opt">לא חובה</span></label><textarea id="fNotes" name="notes" rows="3" maxlength="1000"></textarea></div>
-                    </section>
-
-                    <div class="cf-consents">
-                        <label class="cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה שצוות De Club ייצור איתי קשר בטלפון, בוואטסאפ או במייל לגבי הבקשה.</span></label>
-                        <label class="cf-check"><input type="checkbox" name="consent_privacy" value="yes"><span>קראתי ואני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ואת <a href="terms.html" target="_blank">תנאי השימוש</a>.</span></label>
-                        <p class="cf-err" data-for="consents">כדי לשלוח, אשרו את שני הסעיפים</p>
+                    <div class="cf-checks">
+                        <label class="cf-check"><input type="checkbox" name="consent_contact" value="yes"><span>אני מסכימ/ה להיות בקשר במייל, סמס, וואטסאפ ואמצעים אלקטרוניים שונים</span></label>
+                        <label class="cf-check"><input type="checkbox" name="consent_privacy" value="yes"><span>אני מאשר/ת את <a href="privacy.html" target="_blank">מדיניות הפרטיות</a> ומסכימ/ה שהמידע ישמש למענה לפנייה ולמטרות המפורטות בה*</span></label>
+                        <p class="cf-err" id="cfConsentErr">יש לאשר את מדיניות הפרטיות</p>
                     </div>
 
-                    <button type="submit" class="cf-submit" id="cfSubmit">שליחת הבקשה</button>
-                    <p class="cf-fine">הבקשה נכנסת לתוקף רק אחרי אישור של הצוות. נחזור אליכם תוך 3 ימי עסקים.</p>
-                </div>
-            </form>
+                    <button type="submit" class="cf-submit">שליחה</button>
+                </form>
+            </div>
 
             <div class="cf-done" id="cfDone" hidden tabindex="-1">
-                <h2 class="cf-done-title" id="cfDoneTitle">הבקשה התקבלה</h2>
-                <p class="cf-done-text" id="cfDoneText">צוות De Club יחזור אליכם תוך 3 ימי עסקים כדי להשלים אותה.</p>
-                <a href="index.html" class="cf-home">חזרה לאתר</a>
+                <h2 class="cf-title">הבקשה נשלחה</h2>
+                <p class="cf-lede">צוות De Club ייצור איתכם קשר תוך 3 ימי עסקים לצורך המשך טיפול בבקשה.</p>
+                <a href="index.html" class="cf-submit cf-submit--link">חזרה לאתר</a>
             </div>
+
+            <!-- TODO: De Club cancellation and freeze policy section (like the reference), waiting for the policy text. -->
         </div>
     </main>
 
@@ -289,115 +188,51 @@
     <script src="pages.js"></script>
     <script>
     (function () {
-        var root = document.querySelector('.cf');
         var form = document.getElementById('cfForm');
-        var choice = document.getElementById('cfChoice');
-        var rest = document.getElementById('cfRest');
-        var submit = document.getElementById('cfSubmit');
-        var ret = document.getElementById('cfReturn');
-        var start = document.getElementById('fStart');
         var touched = false;
-        var fmt = new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long' });
-
-        function val(name) {
-            var el = form.elements[name];
-            if (!el) return '';
-            if (el instanceof RadioNodeList) return el.value;
-            return el.type === 'checkbox' ? (el.checked ? el.value : '') : el.value.trim();
-        }
-        function isFreeze() { return val('request_type') === 'freeze'; }
-
-        start.min = new Date().toISOString().slice(0, 10);
-
-        function updateReturn() {
-            var s = val('freeze_start'), len = val('freeze_length');
-            if (!s || !len) { ret.textContent = ''; return; }
-            var d = new Date(s + 'T12:00:00');
-            if (len === '14d') d.setDate(d.getDate() + 14);
-            else d.setMonth(d.getMonth() + parseInt(len, 10));
-            ret.innerHTML = 'נתראה שוב ב-<strong>' + fmt.format(d) + '</strong>';
-        }
-
-        choice.addEventListener('change', function () {
-            var freeze = isFreeze();
-            choice.classList.add('has-choice');
-            root.classList.toggle('is-cancel', !freeze);
-            document.getElementById('cfReasonN').textContent = freeze ? '3' : '2';
-            submit.textContent = freeze ? 'שליחת בקשת הקפאה' : 'שליחת בקשת ביטול';
-            if (rest.hidden) {
-                rest.hidden = false;
-                rest.classList.add('is-in');
-                setTimeout(function () { document.getElementById('fFirst').focus({ preventScroll: true }); rest.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120);
-            }
-            if (touched) validate();
-        });
-        form.addEventListener('change', function (e) {
-            if (e.target.name === 'freeze_start' || e.target.name === 'freeze_length') updateReturn();
-            if (touched) validate();
-        });
-        form.addEventListener('input', function () { if (touched) validate(); });
-
-        var checks = {
-            request_type: [choice, function () { return !!val('request_type'); }],
-            first_name: [null, function () { return val('first_name').length > 1; }],
-            last_name: [null, function () { return val('last_name').length > 1; }],
-            phone: [null, function () { return val('phone').replace(/\D/g, '').length >= 9; }],
-            email: [null, function () { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val('email')); }],
-            freeze_start: [null, function () { return !isFreeze() || !!val('freeze_start'); }],
-            freeze_length: [document.querySelector('.cf-len'), function () { return !isFreeze() || !!val('freeze_length'); }],
-            reason: [null, function () { return !!val('reason'); }],
-            consents: [null, function () { return !!val('consent_contact') && !!val('consent_privacy'); }]
+        function v(n) { var el = form.elements[n]; return el.type === 'checkbox' ? el.checked : (el.value || '').trim(); }
+        var rules = {
+            first_name: function () { return v('first_name').length > 1; },
+            last_name: function () { return v('last_name').length > 1; },
+            email: function () { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')); },
+            phone: function () { return v('phone').replace(/\D/g, '').length >= 9; },
+            request_type: function () { return !!v('request_type'); },
+            reason: function () { return !!v('reason'); }
         };
-
+        form.querySelectorAll('select').forEach(function (s) {
+            s.classList.add('is-empty');
+            s.addEventListener('change', function () { s.classList.toggle('is-empty', !s.value); });
+        });
         function validate() {
             var first = null;
-            Object.keys(checks).forEach(function (name) {
-                var ok = checks[name][1]();
-                var err = form.querySelector('.cf-err[data-for="' + name + '"]');
-                var box = checks[name][0];
-                if (name === 'consents') {
-                    form.querySelectorAll('.cf-check').forEach(function (c) { c.classList.toggle('is-bad', !ok && !c.querySelector('input').checked); });
-                    err.classList.toggle('is-on', !ok);
-                } else if (box) {
-                    box.classList.toggle('is-bad', !ok);
-                    err.classList.toggle('is-on', !ok);
-                } else {
-                    err.parentElement.classList.toggle('is-bad', !ok);
-                    if (!err.parentElement.classList.contains('cf-f')) err.classList.toggle('is-on', !ok);
-                }
-                if (!ok && !first) first = box || err.parentElement;
+            Object.keys(rules).forEach(function (n) {
+                var ok = rules[n](), box = form.elements[n].parentElement;
+                box.classList.toggle('is-bad', !ok);
+                if (!ok && !first) first = form.elements[n];
             });
+            var c = v('consent_privacy');
+            document.getElementById('cfConsentErr').classList.toggle('is-on', !c);
+            if (!c && !first) first = form.elements.consent_privacy;
             return first;
         }
-
+        form.addEventListener('input', function () { if (touched) validate(); });
+        form.addEventListener('change', function () { if (touched) validate(); });
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             touched = true;
             var bad = validate();
-            if (bad) {
-                bad.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                var f = bad.querySelector('input:not([type=radio]), textarea');
-                if (f) f.focus({ preventScroll: true });
-                return;
-            }
-            if (val('bot-field')) return;
-
+            if (bad) { bad.focus(); return; }
+            if (form.elements['bot-field'].value) return;
             var payload = {};
-            new FormData(form).forEach(function (v, k) { if (k !== 'bot-field') payload[k] = v; });
+            new FormData(form).forEach(function (val, k) { if (k !== 'bot-field') payload[k] = val; });
             payload.submitted_at = new Date().toISOString();
-            payload.page = location.href;
             // TODO: wire to the backend (email to the front desk and/or Arbox task). Front end only for now.
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ event: 'cancel_freeze_request', request_type: payload.request_type });
-
-            var freeze = isFreeze();
-            document.getElementById('cfDoneTitle').textContent = freeze ? 'בקשת ההקפאה התקבלה' : 'בקשת הביטול התקבלה';
-            document.getElementById('cfDoneText').textContent = 'צוות De Club יחזור אליכם תוך 3 ימי עסקים כדי להשלים אותה.' + (freeze ? ' עד אז המנוי פעיל כרגיל.' : '');
-            form.hidden = true;
-            document.querySelector('.cf-head').hidden = true;
+            document.getElementById('cfMain').hidden = true;
             var done = document.getElementById('cfDone');
             done.hidden = false;
-            done.focus({ preventScroll: true });
+            done.focus();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     })();
