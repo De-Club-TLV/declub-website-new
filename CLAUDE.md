@@ -71,8 +71,8 @@ All images are self-hosted in the `assets/` directory:
 - Static site, no build command needed.
 
 ## Contact Info
-- **Phone**: +972542077057
-- **WhatsApp**: https://wa.me/972542077057
+- **Phone (tel: links only)**: +972542077057
+- **WhatsApp**: `15512399833`, the ManyChat-connected number. Canonical link `https://api.whatsapp.com/send/?phone=15512399833&text=Hi+De+Club!&type=phone_number&app_absent=0`. Never put the Israeli number on a WhatsApp link (Yuval, 2026-10-19; full contact block in `../Brand/DESIGN.md`)
 - **Instagram**: @declub_tlv
 - **Address**: 2 Bar-Giyora St., Tel Aviv
 
