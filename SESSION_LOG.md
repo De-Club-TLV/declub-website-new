@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-10-19
+
+**Host:** macbook
+**Focus:** Contact-info doc fix.
+
+**Done:**
+- `CLAUDE.md` Contact Info: WhatsApp is the US ManyChat number 15512399833 (formal, Yuval); +972542077057 stays for `tel:` links only. The live site already matched (30 WhatsApp links on the US number, 13 `tel:` links on the Israeli one). Brand assets now live in `../Brand/` (brand book copy kept here for the repo).
+
+**Tokens:** shared session with De Club, see ../SESSION_LOG.md
+
 ## 2026-10-07
 
 **Host:** macbook
