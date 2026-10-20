@@ -1,10 +1,23 @@
 # Session Log
 
 ## Tokens to date
-- Sessions: 5
+- Sessions: 6
 - Tokens (in / out / cache-read): 123,992 / 791,606 / 234,127,642
 
 ---
+
+## 2026-10-20
+
+**Host:** macbook
+**Focus:** Election Night card on the community page.
+
+**Done:**
+- `community.html`: "Upcoming Events" header + events grid back, one card linking https://election.declub.co.il/ (26.10, 21:00, "Election Night @ De Club", Omer Inbar on ECHO and the Jungle), image `assets/images/events/election.webp` (900x1598, from Afik's poster). Commit 1ab75c7, live on https://declub.co.il/community.html (the only events section on the site; `echo.html` has no list).
+
+**Next:**
+- After 26/10: remove the card, and the header if the grid is empty again.
+
+**Tokens:** shared session with De Club, see ../SESSION_LOG.md
 
 ## 2026-10-19
 
